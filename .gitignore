@@ -1,0 +1,90 @@
+# ==========================================
+# Archivos de Entorno y Secretos
+# ==========================================
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+*.env
+
+# ==========================================
+# Dependencias y Builds (Node / Frontend / Fullstack)
+# ==========================================
+node_modules/
+dist/
+build/
+out/
+.next/
+.nuxt/
+.cache/
+.parcel-cache/
+.turbo/
+
+# Logs de gestores de paquetes
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# ==========================================
+# Python (Backend / Scripts)
+# ==========================================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+ENV/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# ==========================================
+# BMAD / Configuraciones Personales
+# ==========================================
+*.user.toml
+_bmad/config.user.toml
+_bmad/custom/config.user.toml
+
+# ==========================================
+# Editores e IDEs
+# ==========================================
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+*.bak
+
+# ==========================================
+# Sistema Operativo
+# ==========================================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# ==========================================
+# Logs y Archivos Temporales
+# ==========================================
+logs/
+*.log
+tmp/
+temp/
+coverage/
+.nyc_output/
