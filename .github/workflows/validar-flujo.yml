@@ -34,20 +34,3 @@ jobs:
             echo "::error::Solo se permite develop -> main o feature/* -> develop."
             exit 1
           fi
-
-  validacion-temporal:
-    name: validar-origen
-    needs: validar-destino
-    if: ${{ always() }}
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Mantener la comprobacion anterior durante el cambio
-        env:
-          RESULTADO: ${{ needs.validar-destino.result }}
-        shell: bash
-        run: |
-          if [[ "$RESULTADO" != "success" ]]; then
-            echo "::error::La validacion de ramas no fue exitosa."
-            exit 1
-          fi
