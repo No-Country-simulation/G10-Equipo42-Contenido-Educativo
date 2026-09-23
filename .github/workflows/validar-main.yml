@@ -1,0 +1,29 @@
+name: Validar entrada a main
+
+on:
+  pull_request_target:
+    branches: [main]
+    types: [opened, synchronize, reopened, edited]
+
+permissions: {}
+
+jobs:
+  validar:
+    name: validar-origen-main
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Comprobar que el origen sea develop
+        env:
+          ORIGEN: ${{ github.event.pull_request.head.ref }}
+          REPO_ORIGEN: ${{ github.event.pull_request.head.repo.full_name }}
+          REPO_DESTINO: ${{ github.repository }}
+        shell: bash
+        run: |
+          if [[ "$REPO_ORIGEN" == "$REPO_DESTINO" &&
+                "$ORIGEN" == "develop" ]]; then
+            echo "Permitido: develop -> main"
+          else
+            echo "::error::Main solo acepta develop del mismo repositorio."
+            exit 1
+          fi

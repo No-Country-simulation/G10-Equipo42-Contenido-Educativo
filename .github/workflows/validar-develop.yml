@@ -1,0 +1,29 @@
+name: Validar entrada a develop
+
+on:
+  pull_request_target:
+    branches: [develop]
+    types: [opened, synchronize, reopened, edited]
+
+permissions: {}
+
+jobs:
+  validar:
+    name: validar-origen-develop
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Comprobar que el origen sea una feature
+        env:
+          ORIGEN: ${{ github.event.pull_request.head.ref }}
+          REPO_ORIGEN: ${{ github.event.pull_request.head.repo.full_name }}
+          REPO_DESTINO: ${{ github.repository }}
+        shell: bash
+        run: |
+          if [[ "$REPO_ORIGEN" == "$REPO_DESTINO" &&
+                "$ORIGEN" == feature/?* ]]; then
+            echo "Permitido: feature/* -> develop"
+          else
+            echo "::error::Develop solo acepta ramas feature/* del mismo repositorio."
+            exit 1
+          fi
