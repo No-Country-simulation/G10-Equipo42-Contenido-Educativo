@@ -8,8 +8,8 @@ on:
 permissions: {}
 
 jobs:
-  validar-origen:
-    name: validar-origen
+  validar-destino:
+    name: validar-origen-${{ github.event.pull_request.base.ref }}
     runs-on: ubuntu-latest
 
     steps:
@@ -27,10 +27,27 @@ jobs:
           fi
 
           if [[ "$BASE" == "main" && "$HEAD" == "develop" ]]; then
-            echo "Permitido: develop → main"
+            echo "Permitido: develop -> main"
           elif [[ "$BASE" == "develop" && "$HEAD" == feature/?* ]]; then
-            echo "Permitido: feature/* → develop"
+            echo "Permitido: feature/* -> develop"
           else
-            echo "::error::Solo se permite develop → main o feature/* → develop."
+            echo "::error::Solo se permite develop -> main o feature/* -> develop."
+            exit 1
+          fi
+
+  validacion-temporal:
+    name: validar-origen
+    needs: validar-destino
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Mantener la comprobacion anterior durante el cambio
+        env:
+          RESULTADO: ${{ needs.validar-destino.result }}
+        shell: bash
+        run: |
+          if [[ "$RESULTADO" != "success" ]]; then
+            echo "::error::La validacion de ramas no fue exitosa."
             exit 1
           fi
