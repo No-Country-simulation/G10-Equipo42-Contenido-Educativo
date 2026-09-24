@@ -1,6 +1,6 @@
 ---
 title: "NuevaMente — Sistema Inteligente de Adaptación y Generación de Contenido Educativo"
-status: draft
+status: final
 created: 2026-09-24
 updated: 2026-09-24
 ---
@@ -72,7 +72,7 @@ El proyecto nace con dos propósitos honestos: ser una herramienta que su propio
 - **Pipeline RAG** — Flujo de procesamiento que segmenta el Documento Fuente en chunks, genera embeddings vectoriales, los indexa, y los recupera para anclar la generación del LLM en el contenido original.
 - **Chunk** — Fragmento semántico del Documento Fuente, resultado de la segmentación. Unidad mínima de indexación y retrieval.
 - **Embedding** — Representación vectorial densa de un Chunk, generada por el modelo de embeddings (Voyage AI). Permite búsqueda por similitud semántica.
-- **Vector Store** — Índice en memoria (FAISS) que almacena los Embeddings y permite búsqueda vectorial eficiente.
+- **Vector Store** — Índice FAISS que almacena los Embeddings y permite búsqueda vectorial eficiente. Se persiste en disco local (`index.faiss` + `index.pkl`).
 - **Anclaje a Fuente (Score)** — Métrica numérica (0.0-1.0) que mide cuánto del contenido generado está respaldado por el Documento Fuente. `[ASSUMPTION: MVP calcula el score mediante autoevaluación del LLM (heurística prompt-based); un método basado en comparación de embeddings se considera diferencial para v2.]`
 - **Agente** — Nodo especializado dentro del grafo LangGraph que ejecuta una tarea específica del pipeline (investigación, redacción, revisión).
 - **Agente Investigador RAG** — Agente que consulta el Vector Store para recuperar los Chunks relevantes según la solicitud.
@@ -84,7 +84,7 @@ El proyecto nace con dos propósitos honestos: ser una herramienta que su propio
 
 ### 4.1 Ingestión y Procesamiento de Documentos
 
-**Descripción:** El sistema acepta un Documento Fuente en formato PDF, Markdown o texto plano, extrae su contenido textual, lo segmenta en Chunks semánticos, genera Embeddings vectoriales para cada Chunk mediante Voyage AI, y los indexa en un Vector Store FAISS en memoria. El resultado es un índice listo para retrieval que persiste durante el procesamiento de la solicitud. Realiza UJ-1, UJ-2, UJ-3.
+**Descripción:** El sistema acepta un Documento Fuente en formato PDF, Markdown o texto plano, extrae su contenido textual, lo segmenta en Chunks semánticos, genera Embeddings vectoriales para cada Chunk mediante Voyage AI, y los indexa en un Vector Store FAISS. El índice se persiste en disco local para reutilización. Realiza UJ-1, UJ-2, UJ-3.
 
 **Functional Requirements:**
 
@@ -359,7 +359,6 @@ El usuario puede consultar generaciones anteriores desde una barra lateral.
 
 - **UI avanzada con framework SPA** — v1 usa HTML estático servido por FastAPI. Un framework SPA (React, Vue, etc.) se evalúa para v2 si la complejidad de la UI lo justifica.
 - **Procesamiento asíncrono** — Solicitudes síncronas en v1. Evaluar async con polling si los tiempos de respuesta exceden lo tolerable.
-
 - **Exportación multiformato** — Markdown, PDF formateado, CSV para Anki. Diferencial deseable.
 - **Quizzes con evaluación en tiempo real** — Interfaz interactiva donde el estudiante responde y recibe retroalimentación. Diferencial deseable.
 - **Despliegue en OCI Compute** — Instancia Always Free. Deseable pero no bloquea evaluación.
@@ -418,7 +417,7 @@ El sistema opera dentro de los límites de 1GB RAM y 1 OCPU (OCI Always Free).
 - Configuración externalizada (modelo LLM, modelo de embeddings, parámetros de chunking, credenciales OCI).
 - Type hints completos (Python 3.12). Pydantic para schemas de entrada y salida.
 
-## 8. Open Questions
+## 9. Open Questions
 
 1. **Estrategia de query RAG para documentos completos.** ¿Cómo se construyen las queries de retrieval cuando no hay pregunta del usuario? Opciones: queries sintéticas por sección, retrieval por outline, full-document para documentos cortos. *→ Resolver en arquitectura.*
 2. **Tamaño máximo de documento procesable.** Sin límite declarado, pero con 1GB RAM hay un techo físico. ¿Se debe detectar y comunicar proactivamente, o dejar que el OOM-kill lo resuelva? *→ Resolver en implementación (idealmente pre-check de tamaño estimado del índice).*
@@ -426,7 +425,7 @@ El sistema opera dentro de los límites de 1GB RAM y 1 OCPU (OCI Always Free).
 4. **Rate limiting de APIs externas.** ¿Qué pasa si Gemini Flash o Voyage AI throttlean durante un request? *→ Definir retry policy en implementación.*
 5. **Timeout de la solicitud.** ¿Hay un timeout máximo antes de cortar la solicitud? *→ Definir en implementación. Sugerido: 3 minutos.*
 
-## 9. Índice de Asunciones
+## 10. Índice de Asunciones
 
 - **§3 Glosario / Anclaje a Fuente:** MVP calcula score mediante autoevaluación del LLM; método por embeddings es diferencial.
 - **§4.1 FR-2:** Se usa PyPDF o equivalente para PDF. No se procesan imágenes/diagramas embebidos.
