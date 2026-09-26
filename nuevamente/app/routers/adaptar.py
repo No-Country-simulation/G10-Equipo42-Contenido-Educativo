@@ -57,12 +57,25 @@ async def _run_pipeline(graph: Any, task_id: str, initial_state: dict[str, Any])
     task_store.set_processing(task_id)
     try:
         resultado = await asyncio.to_thread(graph.invoke, initial_state)
-        task_store.set_completed(task_id, resultado["educational_package"])
+        paquete = resultado["educational_package"]
+        oci_result = storage_service.upload_paquete_educativo(
+            paquete,
+            initial_state["document_id"],
+            initial_state["perfil"],
+            initial_state["formato"],
+        )
+        logger.info(
+            "Upload paquete educativo OCI: task_id=%s status_upload=%s",
+            task_id,
+            oci_result.get("status_upload"),
+        )
+        task_store.set_completed(task_id, paquete, almacenamiento_oci=oci_result)
         logger.info("Pipeline completado: task_id=%s", task_id)
     except Exception as exc:
         mensaje = str(exc)
         logger.error("Pipeline fallido: task_id=%s error=%s", task_id, mensaje)
         task_store.set_failed(task_id, mensaje)
+
 
 
 # ---------------------------------------------------------------------------

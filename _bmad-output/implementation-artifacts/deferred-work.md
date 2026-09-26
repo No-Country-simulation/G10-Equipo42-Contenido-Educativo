@@ -15,3 +15,6 @@
 - source_spec: `_bmad-output/implementation-artifacts/spec-2-1-almacenamiento-de-documentos-fuente-en-oci.md`
   summary: Sin test automatizado para StorageService.upload_documento_fuente y su integración en POST /adaptar
   evidence: El proyecto no tiene suite de tests (pre-existente al cambio); la verificación es manual con uv run python -c ..., patrón establecido desde Epic 1. Si upload_documento_fuente_async se eliminara del handler, nada fallaría automáticamente. Debería cerrarse en una story de calidad con pytest.
+- source_spec: `_bmad-output/implementation-artifacts/spec-2-2-almacenamiento-de-paquetes-educativos-en-oci.md`
+  summary: Sin tests unitarios permanentes para upload_paquete_educativo y su integración en _run_pipeline
+  evidence: El proyecto no tiene suite de tests (pre-existente al cambio); la verificación es manual con uv run python -c ..., patrón establecido desde Epic 1. Debería cerrarse en una story de calidad con pytest y mocks del SDK OCI.

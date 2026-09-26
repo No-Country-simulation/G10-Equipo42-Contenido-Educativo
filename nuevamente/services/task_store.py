@@ -44,16 +44,23 @@ class TaskStore:
             self._tasks[task_id]["status"] = "processing"
             logger.debug("task_store: tarea en procesamiento task_id=%s", task_id)
 
-    def set_completed(self, task_id: str, resultado: dict[str, Any]) -> None:
+    def set_completed(self, task_id: str, resultado: dict[str, Any], almacenamiento_oci: dict[str, Any] | None = None) -> None:
         """Marca la tarea como completada y almacena el resultado.
 
         Args:
             task_id: Identificador de la tarea.
             resultado: Paquete educativo generado (educational_package dict).
+            almacenamiento_oci: Resultado del upload a OCI (opcional). Si se
+                proporciona, se incluye en el dict de la tarea bajo la clave
+                'almacenamiento_oci' para exponerlo en la respuesta del endpoint.
         """
         if task_id in self._tasks:
-            self._tasks[task_id] = {"status": "completed", "resultado": resultado}
+            tarea: dict[str, Any] = {"status": "completed", "resultado": resultado}
+            if almacenamiento_oci is not None:
+                tarea["almacenamiento_oci"] = almacenamiento_oci
+            self._tasks[task_id] = tarea
             logger.info("task_store: tarea completada task_id=%s", task_id)
+
 
     def set_failed(self, task_id: str, error: str) -> None:
         """Marca la tarea como fallida y almacena el mensaje de error.

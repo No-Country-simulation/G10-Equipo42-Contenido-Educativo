@@ -8,7 +8,9 @@ el campo 'status' indicando el resultado de la operacion.
 from __future__ import annotations
 
 import asyncio
+import json
 import logging
+import time
 from pathlib import Path
 
 from nuevamente.config import Settings
@@ -102,6 +104,63 @@ class StorageService:
                 exc,
             )
             return {"status": "fallido", "mensaje": str(exc)}
+
+    def upload_paquete_educativo(
+        self,
+        package_dict: dict,
+        document_id: str,
+        perfil: str,
+        formato: str,
+    ) -> dict[str, str]:
+        """Sube el paquete educativo generado a OCI Object Storage.
+
+        El objeto se almacena bajo el prefijo 'paquetes/' con el document_id,
+        perfil, formato y timestamp como nombre: 'paquetes/<id>_<perfil>_<formato>_<ts>.json'.
+
+        El JSON se serializa con ensure_ascii=False y se sube como bytes UTF-8.
+        Llamada sincrona: debe invocarse desde un thread (p.ej. dentro de
+        asyncio.to_thread) para no bloquear el event loop.
+
+        Args:
+            package_dict: Diccionario del paquete educativo generado por el pipeline.
+            document_id: UUID de la tarea/documento (garantiza unicidad).
+            perfil: Perfil del destinatario (tal cual viene del state).
+            formato: Formato pedagogico (tal cual viene del state).
+
+        Returns:
+            dict con 'status_upload' en {'ok', 'fallido', 'deshabilitado'} y campos
+            adicionales segun el resultado:
+            - ok: {'status_upload': 'ok', 'bucket': '<nombre>', 'objeto_id': 'paquetes/<...>.json'}
+            - fallido: {'status_upload': 'fallido', 'mensaje': '<descripcion del error>'}
+            - deshabilitado: {'status_upload': 'deshabilitado'}
+        """
+        if not self._enabled:
+            return {"status_upload": "deshabilitado"}
+
+        timestamp = int(time.time())
+        object_name = f"paquetes/{document_id}_{perfil}_{formato}_{timestamp}.json"
+        data = json.dumps(package_dict, ensure_ascii=False).encode("utf-8")
+
+        try:
+            assert self._client is not None  # siempre True cuando _enabled es True
+            self._client.upload_object(object_name=object_name, data=data)
+            logger.info(
+                "Paquete educativo subido a OCI: objeto=%s size=%d bytes",
+                object_name,
+                len(data),
+            )
+            return {
+                "status_upload": "ok",
+                "bucket": self._client._bucket_name,
+                "objeto_id": object_name,
+            }
+        except Exception as exc:
+            logger.error(
+                "Error al subir paquete educativo a OCI: objeto=%s error=%s",
+                object_name,
+                exc,
+            )
+            return {"status_upload": "fallido", "mensaje": str(exc)}
 
     # ---------------------------------------------------------------------------
     # API publica — asincronos
