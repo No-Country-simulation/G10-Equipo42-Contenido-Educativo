@@ -2,3 +2,6 @@
 - source_spec: `_bmad-output/implementation-artifacts/spec-1-3-retrieval-contextualizado-agente-investigador-rag.md`
   summary: Agregar tests unitarios formales para infra/llm.py, services/retrieval.py y pipeline/nodes/retrieve.py
   evidence: El proyecto no tiene directorio tests/ desde Story 1.1; issue pre-existente no causado por este story. Un directorio tests/ con pytest cubriria el fast-path, el full-coverage con mocks, el piso de cobertura y el PipelineError.
+- source_spec: `_bmad-output/implementation-artifacts/spec-1-5-evaluacion-de-fidelidad-agente-critico-revisor.md`
+  summary: Agregar tests unitarios para services/evaluation.py (evaluate_fidelity y helpers)
+  evidence: El proyecto no tiene suite de tests propios; la logica pura de _serialize_generated_content y _build_source_text fue verificada inline pero carece de cobertura automatica. Pre-existente al cambio; deberia cerrarse en una story de calidad.
