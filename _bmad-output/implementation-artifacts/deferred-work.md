@@ -5,3 +5,7 @@
 - source_spec: `_bmad-output/implementation-artifacts/spec-1-5-evaluacion-de-fidelidad-agente-critico-revisor.md`
   summary: Agregar tests unitarios para services/evaluation.py (evaluate_fidelity y helpers)
   evidence: El proyecto no tiene suite de tests propios; la logica pura de _serialize_generated_content y _build_source_text fue verificada inline pero carece de cobertura automatica. Pre-existente al cambio; deberia cerrarse en una story de calidad.
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-1-6-ensamblado-del-paquete-educativo-y-grafo-langgraph.md`
+  summary: Agregar tests formales para la logica de retry en draft_node (retorno de retry_count+1) y para el router _should_retry del grafo LangGraph.
+  evidence: El proyecto no tiene suite de tests (pre-existente al cambio); la logica fue verificada inline pero no queda cubierta por un test automatico registrado. Mismo patron que Finding 6 de Story 1.5.

@@ -3,7 +3,7 @@ title: 'Story 1.6: Ensamblado del Paquete Educativo y Grafo LangGraph'
 type: 'feature'
 created: '2026-09-26'
 baseline_commit: '9bb4b2d1e1d6e6c07c53e6c7d2ca79b4ae7795b2'
-status: 'in-review'
+status: 'done'
 route: 'dispatch'
 review_loop_iteration: 0
 context:
@@ -90,6 +90,11 @@ context:
 ## Spec Change Log
 
 ## Review Triage Log
+
+- Finding 1: `settings` no usado en `assemble_package` — verdict: `low` — evidence: el parametro existe para extension futura y coherencia de firma con otros servicios (generation.py, evaluation.py). Cosmético, sin impacto funcional. Route: **reject** (bajo probability de encounter en uso diario, la firma está documentada).
+- Finding 2: Sin tests formales para la logica de retry en `draft_node` (retorno de `retry_count+1`) — verdict: `low` — evidence: el proyecto no tiene suite de tests (pre-existente al cambio); logica pura verificada inline. Mismo deferido que Finding 6 de Story 1.5. Route: **defer**.
+- Finding 3: `except Exception` podria envolver un `PipelineError` interno — verdict: `false` — evidence: el `PipelineError` de formato invalido se lanza antes del bloque try (lineas 55-66); dentro del try solo pueden ocurrir `KeyError` (del dict access) o `ValidationError` de Pydantic. No hay codigo que lance PipelineError dentro del try.
+- Finding 4: `_should_retry` con `retry_count=None` lanzaria TypeError — verdict: `false` — evidence: `draft_node` siempre retorna `retry_count + 1` como int; el state inicial tiene `retry_count` no seteado (TypedDict total=False), por lo que `.get("retry_count", 0)` retorna 0. La clave nunca puede tener valor None en flujo normal.
 
 ## Design Notes
 
