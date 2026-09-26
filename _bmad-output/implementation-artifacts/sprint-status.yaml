@@ -29,21 +29,21 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 09-25-2026 16:07
-last_updated: 09-26-2026 17:18
+last_updated: 09-26-2026 18:15
 project: NuevaMente
 project_key: NOKEY
 tracking_system: file-system
 story_location: _bmad-output/implementation-artifacts
 development_status:
-  epic-1: in-progress
+  epic-1: done
   1-1-fundacion-del-proyecto-y-configuracion: done
-  1-2-ingestion-de-documentos-y-pipeline-rag: review
+  1-2-ingestion-de-documentos-y-pipeline-rag: done
   1-3-retrieval-contextualizado-agente-investigador-rag: done
-  1-4-generacion-de-contenido-adaptado-agente-redactor-pedagogico: review
-  1-5-evaluacion-de-fidelidad-agente-critico-revisor: review
-  1-6-ensamblado-del-paquete-educativo-y-grafo-langgraph: review
-  1-7-api-rest-y-endpoint-de-adaptacion: review
-  epic-1-retrospective: optional
+  1-4-generacion-de-contenido-adaptado-agente-redactor-pedagogico: done
+  1-5-evaluacion-de-fidelidad-agente-critico-revisor: done
+  1-6-ensamblado-del-paquete-educativo-y-grafo-langgraph: done
+  1-7-api-rest-y-endpoint-de-adaptacion: done
+  epic-1-retrospective: done
 
   epic-2: backlog
   2-1-almacenamiento-de-documentos-fuente-en-oci: backlog
@@ -66,3 +66,18 @@ development_status:
   5-2-exportacion-multiformato: backlog
   5-3-despliegue-en-oci-compute: backlog
   epic-5-retrospective: optional
+action_items:
+  - id: "epic-1-retro-item-1-agregar-validacion-de-tamano-maximo-de-a"
+    epic: 1
+    action: "Agregar validacion de tamano maximo de archivo antes de await archivo.read()
+      en POST /adaptar. Rechazar con HTTP 422 si excede el limite configurado."
+    owner: "Jesus"
+    status: open
+    ref: "_bmad-output/implementation-artifacts/epic-1-retro-09-26-2026.md"
+  - id: "epic-1-retro-item-2-guardar-la-referencia-de-asyncio-create_"
+    epic: 1
+    action: "Guardar la referencia de asyncio.create_task en el task_store o en app.state
+      para evitar recoleccion prematura por el GC."
+    owner: "Jesus"
+    status: open
+    ref: "_bmad-output/implementation-artifacts/epic-1-retro-09-26-2026.md"
