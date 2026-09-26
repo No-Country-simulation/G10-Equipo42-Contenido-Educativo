@@ -5,5 +5,6 @@ un dict parcial para fusionar en el state.
 """
 
 from nuevamente.pipeline.nodes.ingest import ingest_node
+from nuevamente.pipeline.nodes.retrieve import retrieve_node
 
-__all__ = ["ingest_node"]
+__all__ = ["ingest_node", "retrieve_node"]
