@@ -63,4 +63,4 @@ def draft_node(state: NuevaMenteState) -> dict[str, Any]:
         formato,
     )
 
-    return {"generated_content": generated_content}
+    return {"generated_content": generated_content, "retry_count": retry_count + 1}
