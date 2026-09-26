@@ -16,6 +16,7 @@ from __future__ import annotations
 import asyncio
 import logging
 import uuid
+from pathlib import Path
 from typing import Any
 
 from fastapi import APIRouter, Form, Request, UploadFile
@@ -23,6 +24,7 @@ from fastapi.responses import JSONResponse
 
 from nuevamente.core.models import FormatoPedagogico, Perfil
 from nuevamente.services.ingestion import extract_text
+from nuevamente.services.storage import storage_service
 from nuevamente.services.task_store import task_store
 
 logger = logging.getLogger(__name__)
@@ -144,6 +146,17 @@ async def adaptar(
         "formato": formato_salida,
         "nicho": nicho_sector,
     }
+
+    # Subir documento fuente a OCI en background (best-effort, no bloquea)
+    asyncio.create_task(
+        storage_service.upload_documento_fuente_async(file_bytes, file_name, document_id)
+    )
+    logger.info(
+        "Documento fuente encolado para upload OCI: task_id=%s objeto=documentos/%s%s",
+        task_id,
+        document_id,
+        Path(file_name).suffix,
+    )
 
     # Registrar tarea y lanzar pipeline en background
     task_store.create(task_id)

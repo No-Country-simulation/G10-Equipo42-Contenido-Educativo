@@ -12,3 +12,6 @@
 - source_spec: `_bmad-output/implementation-artifacts/spec-1-7-api-rest-y-endpoint-de-adaptacion.md`
   summary: Sin validación de tamaño máximo de archivo en el endpoint POST /api/v1/adaptar
   evidence: El epic-1-context.md establece el límite de hardware (1GB RAM, OCPU 1), y el objetivo de <2min para hasta 1000 líneas, pero no especifica un límite explícito de bytes en el upload. Un archivo muy grande podría saturar la RAM antes de que el pipeline lo procese. La validación debería hacerse antes de leer los bytes completos (usando archivo.size o leyendo en chunks).
+- source_spec: `_bmad-output/implementation-artifacts/spec-2-1-almacenamiento-de-documentos-fuente-en-oci.md`
+  summary: Sin test automatizado para StorageService.upload_documento_fuente y su integración en POST /adaptar
+  evidence: El proyecto no tiene suite de tests (pre-existente al cambio); la verificación es manual con uv run python -c ..., patrón establecido desde Epic 1. Si upload_documento_fuente_async se eliminara del handler, nada fallaría automáticamente. Debería cerrarse en una story de calidad con pytest.
