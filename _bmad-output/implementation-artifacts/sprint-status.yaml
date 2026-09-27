@@ -29,7 +29,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 09-25-2026 16:07
-last_updated: 09-27-2026 15:28
+last_updated: 09-27-2026 15:39
 project: NuevaMente
 project_key: NOKEY
 tracking_system: file-system
@@ -50,11 +50,11 @@ development_status:
   2-2-almacenamiento-de-paquetes-educativos-en-oci: done
   epic-2-retrospective: done
 
-  epic-3: in-progress
-  3-1-upload-de-documentos-y-configuracion-de-parametros: review
-  3-2-generacion-con-feedback-de-progreso-y-visualizacion-de-resul: review
-  3-3-historial-de-generaciones: review
-  epic-3-retrospective: optional
+  epic-3: done
+  3-1-upload-de-documentos-y-configuracion-de-parametros: done
+  3-2-generacion-con-feedback-de-progreso-y-visualizacion-de-resul: done
+  3-3-historial-de-generaciones: done
+  epic-3-retrospective: done
 
   epic-4: backlog
   4-1-ejecucion-de-escenarios-de-demostracion: backlog
@@ -103,3 +103,33 @@ action_items:
     owner: "Jesus"
     status: done
     ref: "_bmad-output/implementation-artifacts/epic-2-retro-09-26-2026.md"
+  - id: "epic-3-retro-item-6-agregar-timeout-maximo-al-ciclo-de-polli"
+    epic: 3
+    action: "Agregar timeout maximo al ciclo de polling en app.js: tras N iteraciones
+      (sugerido 60 x 2s) llamar clearInterval y mostrar panel de error con boton Reintentar."
+    owner: "Jesus"
+    status: open
+    ref: "_bmad-output/implementation-artifacts/epic-3-retro-09-27-2026.md"
+  - id: "epic-3-retro-item-7-robustecer-parsing-de-list_paquetes-cont"
+    epic: 3
+    action: "Robustecer parsing de list_paquetes contra underscores en enum values:
+      reemplazar rsplit con regex anclado al final o estandarizar separador en nombre
+      de objeto OCI."
+    owner: "Jesus"
+    status: open
+    ref: "_bmad-output/implementation-artifacts/epic-3-retro-09-27-2026.md"
+  - id: "epic-3-retro-item-8-agregar-tests-automatizados-con-pytest-h"
+    epic: 3
+    action: "Agregar tests automatizados con pytest+httpx para GET /historial, GET
+      /historial/{id}, list_paquetes() y get_paquete() con mocks de OCIStorageClient."
+    owner: "Jesus"
+    status: open
+    ref: "_bmad-output/implementation-artifacts/epic-3-retro-09-27-2026.md"
+  - id: "epic-3-retro-item-9-actualizar-spec-de-story-3-1-para-docume"
+    epic: 3
+    action: "Actualizar spec de Story 3.1 para documentar la clave document_id en
+      la respuesta del endpoint GET /historial: contrato real es objeto_id, document_id,
+      perfil, formato, fecha_epoch, fecha_iso."
+    owner: "Jesus"
+    status: open
+    ref: "_bmad-output/implementation-artifacts/epic-3-retro-09-27-2026.md"
