@@ -50,6 +50,9 @@ class Settings(BaseSettings):
     oci_config_file: Path = Path("~/.oci/config")
     oci_config_profile: str = "DEFAULT"
 
+    # --- Limites ---
+    nm_max_file_size_mb: int = 50  # Tamano maximo de archivo en MB (0 = sin limite)
+
     # --- Servidor ---
     host: str = "0.0.0.0"
     port: int = 8000

@@ -3,6 +3,10 @@
 Capa best-effort: cualquier fallo del SDK OCI queda registrado en el log
 pero nunca propaga al llamante. Todos los metodos retornan un dict con
 el campo 'status' indicando el resultado de la operacion.
+
+Ambos metodos (upload_documento_fuente y upload_paquete_educativo) usan
+la misma clave de retorno 'status' para mantener consistencia en el contrato
+de la interfaz de StorageService.
 """
 
 from __future__ import annotations
@@ -128,14 +132,14 @@ class StorageService:
             formato: Formato pedagogico (tal cual viene del state).
 
         Returns:
-            dict con 'status_upload' en {'ok', 'fallido', 'deshabilitado'} y campos
+            dict con 'status' en {'ok', 'fallido', 'deshabilitado'} y campos
             adicionales segun el resultado:
-            - ok: {'status_upload': 'ok', 'bucket': '<nombre>', 'objeto_id': 'paquetes/<...>.json'}
-            - fallido: {'status_upload': 'fallido', 'mensaje': '<descripcion del error>'}
-            - deshabilitado: {'status_upload': 'deshabilitado'}
+            - ok: {'status': 'ok', 'bucket': '<nombre>', 'objeto_id': 'paquetes/<...>.json'}
+            - fallido: {'status': 'fallido', 'mensaje': '<descripcion del error>'}
+            - deshabilitado: {'status': 'deshabilitado'}
         """
         if not self._enabled:
-            return {"status_upload": "deshabilitado"}
+            return {"status": "deshabilitado"}
 
         timestamp = int(time.time())
         object_name = f"paquetes/{document_id}_{perfil}_{formato}_{timestamp}.json"
@@ -150,8 +154,8 @@ class StorageService:
                 len(data),
             )
             return {
-                "status_upload": "ok",
-                "bucket": self._client._bucket_name,
+                "status": "ok",
+                "bucket": self._client.bucket_name,
                 "objeto_id": object_name,
             }
         except Exception as exc:
@@ -160,7 +164,7 @@ class StorageService:
                 object_name,
                 exc,
             )
-            return {"status_upload": "fallido", "mensaje": str(exc)}
+            return {"status": "fallido", "mensaje": str(exc)}
 
     # ---------------------------------------------------------------------------
     # API publica — asincronos

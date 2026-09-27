@@ -47,6 +47,11 @@ class OCIStorageClient:
             self._bucket_name,
         )
 
+    @property
+    def bucket_name(self) -> str:
+        """Nombre del bucket OCI configurado."""
+        return self._bucket_name
+
     def upload_object(
         self,
         object_name: str,

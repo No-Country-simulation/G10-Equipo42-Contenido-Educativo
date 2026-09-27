@@ -22,6 +22,7 @@ from typing import Any
 from fastapi import APIRouter, Form, Request, UploadFile
 from fastapi.responses import JSONResponse
 
+from nuevamente.config import Settings
 from nuevamente.core.models import FormatoPedagogico, Perfil
 from nuevamente.services.ingestion import extract_text
 from nuevamente.services.storage import storage_service
@@ -31,9 +32,29 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
+# Configuracion de limites
+_settings = Settings()
+_MAX_FILE_SIZE_BYTES: int = _settings.nm_max_file_size_mb * 1024 * 1024  # 0 = sin limite
+
 # Valores validos para los enums de personalizacion
 _PERFILES_VALIDOS = {p.value for p in Perfil}
 _FORMATOS_VALIDOS = {f.value for f in FormatoPedagogico}
+
+
+def _register_background_task(request: Request, task: asyncio.Task) -> None:
+    """Registra una tarea asyncio en app.state para evitar recoleccion prematura por el GC.
+
+    Agrega la tarea al set app.state._background_tasks. Cuando la tarea termina,
+    se remueve automaticamente del set via callback, manteniendo el conjunto compacto.
+
+    Args:
+        request: Request de FastAPI para acceder a app.state.
+        task: Tarea asyncio a retener.
+    """
+    if not hasattr(request.app.state, "_background_tasks"):
+        request.app.state._background_tasks: set[asyncio.Task] = set()
+    request.app.state._background_tasks.add(task)
+    task.add_done_callback(request.app.state._background_tasks.discard)
 
 
 # ---------------------------------------------------------------------------
@@ -65,9 +86,9 @@ async def _run_pipeline(graph: Any, task_id: str, initial_state: dict[str, Any])
             initial_state["formato"],
         )
         logger.info(
-            "Upload paquete educativo OCI: task_id=%s status_upload=%s",
+            "Upload paquete educativo OCI: task_id=%s status=%s",
             task_id,
-            oci_result.get("status_upload"),
+            oci_result.get("status"),
         )
         task_store.set_completed(task_id, paquete, almacenamiento_oci=oci_result)
         logger.info("Pipeline completado: task_id=%s", task_id)
@@ -141,8 +162,38 @@ async def adaptar(
             },
         )
 
+    # Validar tamano del archivo antes de leerlo en memoria (item 1 retro epic 1)
+    if _MAX_FILE_SIZE_BYTES > 0 and archivo.size is not None and archivo.size > _MAX_FILE_SIZE_BYTES:
+        return JSONResponse(
+            status_code=422,
+            content={
+                "status": "error",
+                "codigo": "archivo_demasiado_grande",
+                "mensaje": (
+                    f"El archivo excede el tamano maximo permitido de "
+                    f"{_settings.nm_max_file_size_mb} MB "
+                    f"({archivo.size} bytes recibidos)."
+                ),
+            },
+        )
+
     # Leer bytes del archivo y extraer texto (puede lanzar DocumentoNoSoportado / DocumentoVacio)
     file_bytes = await archivo.read()
+
+    # Validacion de tamano post-lectura como segunda defensa (cuando size no viene en el header)
+    if _MAX_FILE_SIZE_BYTES > 0 and len(file_bytes) > _MAX_FILE_SIZE_BYTES:
+        return JSONResponse(
+            status_code=422,
+            content={
+                "status": "error",
+                "codigo": "archivo_demasiado_grande",
+                "mensaje": (
+                    f"El archivo excede el tamano maximo permitido de "
+                    f"{_settings.nm_max_file_size_mb} MB "
+                    f"({len(file_bytes)} bytes recibidos)."
+                ),
+            },
+        )
     file_name = archivo.filename or "documento"
     raw_text = extract_text(file_bytes, file_name)  # propaga excepciones de dominio
 
@@ -161,9 +212,11 @@ async def adaptar(
     }
 
     # Subir documento fuente a OCI en background (best-effort, no bloquea)
-    asyncio.create_task(
+    # La referencia se retiene en app.state._background_tasks para evitar GC prematuro (item 2 retro epic 1)
+    oci_task = asyncio.create_task(
         storage_service.upload_documento_fuente_async(file_bytes, file_name, document_id)
     )
+    _register_background_task(request, oci_task)
     logger.info(
         "Documento fuente encolado para upload OCI: task_id=%s objeto=documentos/%s%s",
         task_id,
@@ -173,9 +226,10 @@ async def adaptar(
 
     # Registrar tarea y lanzar pipeline en background
     task_store.create(task_id)
-    asyncio.create_task(
+    pipeline_task = asyncio.create_task(
         _run_pipeline(request.app.state.graph, task_id, initial_state)
     )
+    _register_background_task(request, pipeline_task)
 
     logger.info(
         "Tarea creada: task_id=%s archivo=%s perfil=%s formato=%s",

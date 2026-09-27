@@ -29,7 +29,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 09-25-2026 16:07
-last_updated: 09-26-2026 20:32
+last_updated: 09-26-2026 21:35
 project: NuevaMente
 project_key: NOKEY
 tracking_system: file-system
@@ -72,14 +72,14 @@ action_items:
     action: "Agregar validacion de tamano maximo de archivo antes de await archivo.read()
       en POST /adaptar. Rechazar con HTTP 422 si excede el limite configurado."
     owner: "Jesus"
-    status: open
+    status: done
     ref: "_bmad-output/implementation-artifacts/epic-1-retro-09-26-2026.md"
   - id: "epic-1-retro-item-2-guardar-la-referencia-de-asyncio-create_"
     epic: 1
     action: "Guardar la referencia de asyncio.create_task en el task_store o en app.state
       para evitar recoleccion prematura por el GC."
     owner: "Jesus"
-    status: open
+    status: done
     ref: "_bmad-output/implementation-artifacts/epic-1-retro-09-26-2026.md"
   - id: "epic-2-retro-item-3-normalizar-la-clave-de-retorno-de-storag"
     epic: 2
@@ -87,19 +87,19 @@ action_items:
       fuente) y status_upload (paquetes) en una sola clave consistente, o documentar
       la asimetría como parte del contrato de la interfaz."
     owner: "Jesus"
-    status: open
+    status: done
     ref: "_bmad-output/implementation-artifacts/epic-2-retro-09-26-2026.md"
   - id: "epic-2-retro-item-4-exponer-bucket_name-como-propiedad-públi"
     epic: 2
     action: "Exponer bucket_name como propiedad pública en OCIStorageClient en lugar
       de acceder a _bucket_name desde StorageService."
     owner: "Jesus"
-    status: open
+    status: done
     ref: "_bmad-output/implementation-artifacts/epic-2-retro-09-26-2026.md"
   - id: "epic-2-retro-item-5-crear-tests-automatizados-para-storagese"
     epic: 2
     action: "Crear tests automatizados para StorageService (ambos métodos) con mocks
       del SDK OCI, cubriendo los tres estados: ok, fallido, deshabilitado."
     owner: "Jesus"
-    status: open
+    status: done
     ref: "_bmad-output/implementation-artifacts/epic-2-retro-09-26-2026.md"
