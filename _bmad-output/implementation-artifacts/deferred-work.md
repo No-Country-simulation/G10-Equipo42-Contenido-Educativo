@@ -18,3 +18,9 @@
 - source_spec: `_bmad-output/implementation-artifacts/spec-2-2-almacenamiento-de-paquetes-educativos-en-oci.md`
   summary: Sin tests unitarios permanentes para upload_paquete_educativo y su integración en _run_pipeline
   evidence: El proyecto no tiene suite de tests (pre-existente al cambio); la verificación es manual con uv run python -c ..., patrón establecido desde Epic 1. Debería cerrarse en una story de calidad con pytest y mocks del SDK OCI.
+- source_spec: `_bmad-output/implementation-artifacts/spec-3-1-upload-de-documentos-y-configuracion-de-parametros.md`
+  summary: Parsing de object_name con rsplit es frágil si futuros enums incluyen underscore en perfil o formato
+  evidence: BH-1 — Los enums actuales (Perfil, FormatoPedagogico) no contienen underscores, así que no hay defecto hoy. Si en el futuro se agrega un valor como "Lider_Tecnico", el rsplit("_", 3) producirá una lista con más de 4 partes y el objeto será omitido silenciosamente. Mitigación: cambiar el nombre del objeto en OCI para usar un separador alternativo (e.g. "|") o incluir un índice fijo.
+- source_spec: `_bmad-output/implementation-artifacts/spec-3-1-upload-de-documentos-y-configuracion-de-parametros.md`
+  summary: Sin test automatizado para GET /historial con OCI habilitado (con objetos reales en bucket)
+  evidence: VG-1 — Solo se verificó el caso OCI deshabilitado (retorna lista vacía). El caso con OCI habilitado requiere un bucket real o mocks del SDK que el proyecto aún no tiene. Pre-existente al cambio; mismo patrón que Epics 1 y 2.

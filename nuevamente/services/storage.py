@@ -12,6 +12,7 @@ de la interfaz de StorageService.
 from __future__ import annotations
 
 import asyncio
+import datetime
 import json
 import logging
 import time
@@ -165,6 +166,81 @@ class StorageService:
                 exc,
             )
             return {"status": "fallido", "mensaje": str(exc)}
+
+    # ---------------------------------------------------------------------------
+    # API publica — listado
+    # ---------------------------------------------------------------------------
+
+    def list_paquetes(self) -> list[dict]:
+        """Lista los paquetes educativos almacenados en OCI Object Storage.
+
+        Consulta el prefijo 'paquetes/' del bucket y parsea los nombres de los
+        objetos para extraer metadata (document_id, perfil, formato, timestamp).
+
+        El nombre de los objetos sigue el patron:
+        paquetes/{document_id}_{perfil}_{formato}_{timestamp}.json
+
+        Returns:
+            Lista de dicts con claves: objeto_id, perfil, formato,
+            fecha_epoch (int), fecha_iso (str ISO 8601 UTC).
+            Lista vacia si OCI esta deshabilitado o si ocurre un error.
+        """
+        if not self._enabled:
+            return []
+
+        try:
+            assert self._client is not None  # siempre True cuando _enabled es True
+            object_names = self._client.list_objects("paquetes/")
+        except Exception as exc:
+            logger.error(
+                "Error al listar paquetes en OCI: error=%s",
+                exc,
+            )
+            return []
+
+        generaciones: list[dict] = []
+        for object_name in object_names:
+            try:
+                # Formato: paquetes/{document_id}_{perfil}_{formato}_{timestamp}.json
+                # rsplit con maxsplit=3 separa los ultimos 3 underscores
+                base = object_name.replace("paquetes/", "").replace(".json", "")
+                parts = base.rsplit("_", 3)
+                if len(parts) != 4:
+                    logger.warning(
+                        "Nombre de objeto con formato inesperado: %s — omitido",
+                        object_name,
+                    )
+                    continue
+                document_id, perfil, formato, ts_str = parts
+                fecha_epoch = int(ts_str)
+                fecha_iso = datetime.datetime.fromtimestamp(
+                    fecha_epoch, tz=datetime.timezone.utc
+                ).isoformat()
+                generaciones.append(
+                    {
+                        "objeto_id": object_name,
+                        "document_id": document_id,
+                        "perfil": perfil,
+                        "formato": formato,
+                        "fecha_epoch": fecha_epoch,
+                        "fecha_iso": fecha_iso,
+                    }
+                )
+            except Exception as exc:
+                logger.warning(
+                    "Error al parsear metadata de objeto '%s': %s — omitido",
+                    object_name,
+                    exc,
+                )
+                continue
+
+        # Ordenar de mas reciente a mas antiguo
+        generaciones.sort(key=lambda g: g["fecha_epoch"], reverse=True)
+        logger.info(
+            "Paquetes listados desde OCI: total=%d",
+            len(generaciones),
+        )
+        return generaciones
 
     # ---------------------------------------------------------------------------
     # API publica — asincronos

@@ -10,9 +10,11 @@ from __future__ import annotations
 
 import logging
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 from fastapi import FastAPI, Request
-from fastapi.responses import JSONResponse
+from fastapi.responses import FileResponse, JSONResponse
+from fastapi.staticfiles import StaticFiles
 
 from nuevamente.app.routers import adaptar_router
 from nuevamente.core.exceptions import NuevaMenteError
@@ -99,3 +101,25 @@ async def generic_error_handler(request: Request, exc: Exception) -> JSONRespons
 # ---------------------------------------------------------------------------
 
 app.include_router(adaptar_router, prefix="/api/v1")
+
+
+# ---------------------------------------------------------------------------
+# Archivos estaticos e interfaz web
+# ---------------------------------------------------------------------------
+
+_static_dir = Path(__file__).parent / "static"
+
+
+@app.get("/", include_in_schema=False)
+async def root() -> FileResponse:
+    """Sirve la interfaz web principal (index.html).
+
+    Retorna el archivo index.html de la SPA. El endpoint se excluye del
+    schema OpenAPI para no contaminar la documentacion de la API REST.
+    """
+    return FileResponse(str(_static_dir / "index.html"))
+
+
+# Montar directorio de estaticos bajo /static
+# IMPORTANTE: debe ir despues de los routers para que /api/v1/* tenga precedencia
+app.mount("/static", StaticFiles(directory=str(_static_dir)), name="static")

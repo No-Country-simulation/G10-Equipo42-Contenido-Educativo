@@ -275,3 +275,28 @@ async def consultar_tarea(task_id: str) -> JSONResponse:
         status_code=200,
         content={"task_id": task_id, **tarea},
     )
+
+
+@router.get("/historial")
+async def listar_historial() -> JSONResponse:
+    """Lista el historial de paquetes educativos generados y persistidos en OCI.
+
+    Consulta el prefijo 'paquetes/' del bucket OCI y retorna los metadatos
+    de cada generacion: perfil, formato, fecha y objeto_id para referencia.
+
+    Si OCI no esta configurado o no es accesible, retorna lista vacia sin error.
+
+    Returns:
+        JSONResponse con status 200 y la clave 'generaciones' conteniendo
+        una lista de dicts con: objeto_id, document_id, perfil, formato,
+        fecha_epoch y fecha_iso.
+    """
+    generaciones = storage_service.list_paquetes()
+    logger.info(
+        "Historial consultado: total=%d generaciones",
+        len(generaciones),
+    )
+    return JSONResponse(
+        status_code=200,
+        content={"generaciones": generaciones},
+    )

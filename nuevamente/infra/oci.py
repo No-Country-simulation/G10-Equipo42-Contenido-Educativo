@@ -88,3 +88,39 @@ class OCIStorageClient:
             object_name,
             len(data),
         )
+
+    def list_objects(
+        self,
+        prefix: str,
+        limit: int = 100,
+    ) -> list[str]:
+        """Lista objetos en el bucket con el prefijo dado.
+
+        Args:
+            prefix: Prefijo de filtro (e.g. "paquetes/").
+            limit: Numero maximo de objetos a retornar.
+
+        Returns:
+            Lista de nombres de objeto (object_name) dentro del bucket.
+
+        Raises:
+            oci.exceptions.ServiceError: Si OCI retorna un error HTTP.
+            oci.exceptions.RequestException: Si hay problemas de red/timeout.
+            Exception: Cualquier otra excepcion del SDK.
+        """
+        response = self._client.list_objects(
+            namespace_name=self._namespace,
+            bucket_name=self._bucket_name,
+            prefix=prefix,
+            limit=limit,
+        )
+        names = [obj.name for obj in response.data.objects]
+        logger.debug(
+            "Listado de objetos: namespace=%s bucket=%s prefix=%s total=%d",
+            self._namespace,
+            self._bucket_name,
+            prefix,
+            len(names),
+        )
+        return names
+
