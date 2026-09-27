@@ -242,9 +242,36 @@ class StorageService:
         )
         return generaciones
 
-    # ---------------------------------------------------------------------------
-    # API publica — asincronos
-    # ---------------------------------------------------------------------------
+    def get_paquete(self, objeto_id: str) -> dict | None:
+        """Descarga y parsea un paquete educativo desde OCI Object Storage.
+
+        Args:
+            objeto_id: Nombre completo del objeto en el bucket (e.g. 'paquetes/...json').
+
+        Returns:
+            Dict del paquete educativo parseado desde JSON, o None si OCI esta
+            deshabilitado, el objeto no existe, o cualquier otro error ocurre.
+        """
+        if not self._enabled:
+            return None
+
+        try:
+            assert self._client is not None  # siempre True cuando _enabled es True
+            raw_bytes = self._client.get_object(objeto_id)
+            paquete = json.loads(raw_bytes.decode("utf-8"))
+            logger.info(
+                "Paquete educativo descargado desde OCI: objeto=%s",
+                objeto_id,
+            )
+            return paquete
+        except Exception as exc:
+            logger.error(
+                "Error al descargar paquete desde OCI: objeto=%s error=%s",
+                objeto_id,
+                exc,
+            )
+            return None
+
 
     async def upload_documento_fuente_async(
         self,

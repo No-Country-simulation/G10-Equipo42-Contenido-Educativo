@@ -30,3 +30,6 @@
 - source_spec: `_bmad-output/implementation-artifacts/spec-3-2-generacion-con-feedback-de-progreso-y-visualizacion-de-resul.md`
   summary: Sin tests automatizados para los renderers de formato pedagógico (renderFlashcards, renderQuiz, etc.)
   evidence: VG-1 — Patrón pre-existente del proyecto (verificación manual). Los renderers son funciones puras que retornan HTML; serían fáciles de cubrir con pruebas de snapshot en Jest o similar. Debería cerrarse en una story de calidad con suite de tests JS.
+- source_spec: `_bmad-output/implementation-artifacts/spec-3-3-historial-de-generaciones.md`
+  summary: Sin tests automatizados para OCIStorageClient.get_object, StorageService.get_paquete y GET /historial/{id}
+  evidence: VG-1 — Patrón pre-existente del proyecto (verificación manual establecida desde Epic 1). Los tres comportamientos añadidos carecen de cobertura automática. Debería cerrarse en una story de calidad con pytest y mocks del SDK OCI.

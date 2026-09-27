@@ -29,7 +29,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 09-25-2026 16:07
-last_updated: 09-27-2026 12:21
+last_updated: 09-27-2026 15:28
 project: NuevaMente
 project_key: NOKEY
 tracking_system: file-system
@@ -53,7 +53,7 @@ development_status:
   epic-3: in-progress
   3-1-upload-de-documentos-y-configuracion-de-parametros: review
   3-2-generacion-con-feedback-de-progreso-y-visualizacion-de-resul: review
-  3-3-historial-de-generaciones: backlog
+  3-3-historial-de-generaciones: review
   epic-3-retrospective: optional
 
   epic-4: backlog

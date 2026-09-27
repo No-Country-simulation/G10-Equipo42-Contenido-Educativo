@@ -87,6 +87,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initParamListeners();
   initGenerateButton();
   initQuizInteractivity();
+  initHistorialInteractivity();
 
   // Cargar historial al iniciar
   loadHistorial();
@@ -874,9 +875,50 @@ function renderHistorial(generaciones) {
   });
 
   sidebarList.innerHTML = items.join('');
+}
 
-  // Nota: la carga del paquete completo desde OCI es responsabilidad de Story 3.3.
-  // Por ahora los items son informativos (solo visualización del historial).
+/**
+ * Registra los handlers de interacción del historial sobre el contenedor estático.
+ * Usa event delegation para soportar elementos generados dinámicamente.
+ * Se llama una sola vez en DOMContentLoaded.
+ */
+function initHistorialInteractivity() {
+  function handleHistItem(e) {
+    const item = e.target.closest('.hist-item');
+    if (!item) return;
+    if (e.type === 'keydown' && e.key !== 'Enter' && e.key !== ' ') return;
+    if (e.type === 'keydown') e.preventDefault();
+    const objetoId = item.dataset.objetoId;
+    if (objetoId) loadPaqueteFromHistorial(objetoId);
+  }
+
+  sidebarList.addEventListener('click', handleHistItem);
+  sidebarList.addEventListener('keydown', handleHistItem);
+}
+
+/**
+ * Descarga un paquete educativo desde OCI via el endpoint de historial
+ * y lo renderiza en el panel principal reutilizando showResult().
+ * @param {string} objetoId - object name del paquete (e.g. 'paquetes/...json')
+ */
+async function loadPaqueteFromHistorial(objetoId) {
+  stopPolling();
+  showProgress('Cargando paquete desde historial...');
+  hideResult();
+  hideErrorPanel();
+
+  try {
+    const response = await fetch(`${API_BASE}/historial/${encodeURIComponent(objetoId)}`);
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`);
+    }
+    const data = await response.json();
+    hideProgress();
+    showResult({ status: 'completed', resultado: data.resultado });
+  } catch (err) {
+    hideProgress();
+    showErrorPanel('No se pudo cargar el paquete del historial.');
+  }
 }
 
 /**

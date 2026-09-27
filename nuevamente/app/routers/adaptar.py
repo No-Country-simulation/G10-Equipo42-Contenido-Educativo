@@ -1,10 +1,13 @@
 """Router de adaptacion de documentos.
 
-Expone dos endpoints:
+Expone los siguientes endpoints:
 - POST /adaptar: recibe un documento y parametros de personalizacion,
   lanza el pipeline en background y retorna 202 + task_id.
 - GET /adaptar/{task_id}: retorna el estado actual de la tarea y,
   cuando esta completada, el paquete educativo generado.
+- GET /historial: lista los paquetes educativos persistidos en OCI.
+- GET /historial/{objeto_id_encoded:path}: descarga y retorna un paquete
+  especifico desde OCI por su object name URL-encoded.
 
 El pipeline se ejecuta via asyncio.to_thread(graph.invoke, state) ya que
 todos los nodos del grafo LangGraph son sincronos. Esto libera el event loop
@@ -15,6 +18,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import urllib.parse
 import uuid
 from pathlib import Path
 from typing import Any
@@ -299,4 +303,46 @@ async def listar_historial() -> JSONResponse:
     return JSONResponse(
         status_code=200,
         content={"generaciones": generaciones},
+    )
+
+
+@router.get("/historial/{objeto_id_encoded:path}")
+async def get_paquete_historial(objeto_id_encoded: str) -> JSONResponse:
+    """Descarga un paquete educativo especifico desde OCI Object Storage.
+
+    El objeto_id viene URL-encoded en el path (p.ej. 'paquetes%2F...' o
+    'paquetes/...' con path matching). Se decodifica y se descarga desde OCI.
+
+    Si OCI no esta configurado, el objeto fue eliminado o cualquier error
+    ocurre, retorna 404 con detalle del error.
+
+    Returns:
+        JSONResponse con status 200 y la clave 'resultado' con el paquete,
+        o 404 con 'detail' si no se pudo obtener.
+    """
+    objeto_id = urllib.parse.unquote(objeto_id_encoded)
+    logger.info(
+        "Solicitud de descarga de paquete desde historial: objeto=%s",
+        objeto_id,
+    )
+
+    paquete = await asyncio.to_thread(storage_service.get_paquete, objeto_id)
+
+    if paquete is None:
+        logger.warning(
+            "Paquete no encontrado o error al descargar: objeto=%s",
+            objeto_id,
+        )
+        return JSONResponse(
+            status_code=404,
+            content={"detail": "Paquete no encontrado."},
+        )
+
+    logger.info(
+        "Paquete entregado desde historial: objeto=%s",
+        objeto_id,
+    )
+    return JSONResponse(
+        status_code=200,
+        content={"resultado": paquete},
     )

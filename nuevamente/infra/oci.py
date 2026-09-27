@@ -124,3 +124,34 @@ class OCIStorageClient:
         )
         return names
 
+    def get_object(
+        self,
+        object_name: str,
+    ) -> bytes:
+        """Descarga un objeto de OCI Object Storage.
+
+        Args:
+            object_name: Nombre (key) del objeto dentro del bucket.
+
+        Returns:
+            Contenido binario del objeto.
+
+        Raises:
+            oci.exceptions.ServiceError: Si OCI retorna un error HTTP (incluye 404).
+            oci.exceptions.RequestException: Si hay problemas de red/timeout.
+            Exception: Cualquier otra excepcion del SDK.
+        """
+        response = self._client.get_object(
+            namespace_name=self._namespace,
+            bucket_name=self._bucket_name,
+            object_name=object_name,
+        )
+        data = response.data.content
+        logger.debug(
+            "Objeto descargado exitosamente: namespace=%s bucket=%s objeto=%s size=%d bytes",
+            self._namespace,
+            self._bucket_name,
+            object_name,
+            len(data),
+        )
+        return data
