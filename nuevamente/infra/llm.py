@@ -22,8 +22,14 @@ def get_llm(settings: Settings) -> BaseChatModel:
     Returns:
         Instancia de BaseChatModel lista para invocar.
     """
+    kwargs: dict = {
+        "temperature": settings.llm_temperature,
+        "max_retries": settings.llm_max_retries,
+    }
+    if settings.google_api_key:
+        kwargs["api_key"] = settings.google_api_key
+
     return init_chat_model(
         settings.llm_model_name,
-        temperature=settings.llm_temperature,
-        max_retries=settings.llm_max_retries,
+        **kwargs,
     )

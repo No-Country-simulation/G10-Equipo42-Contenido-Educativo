@@ -4,7 +4,9 @@ Usa pydantic-settings para cargar variables de entorno con defaults sensatos.
 Las variables se pueden configurar via archivo .env o variables de entorno del sistema.
 """
 
+import os
 from pathlib import Path
+from typing import Any
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -57,3 +59,12 @@ class Settings(BaseSettings):
     host: str = "0.0.0.0"
     port: int = 8000
     log_level: str = "info"
+
+    def model_post_init(self, __context: Any) -> None:
+        """Sincroniza API keys con os.environ si estan configuradas."""
+        super().model_post_init(__context)
+        if self.google_api_key:
+            os.environ.setdefault("GOOGLE_API_KEY", self.google_api_key)
+            os.environ.setdefault("GEMINI_API_KEY", self.google_api_key)
+        if self.voyage_api_key:
+            os.environ.setdefault("VOYAGE_API_KEY", self.voyage_api_key)
