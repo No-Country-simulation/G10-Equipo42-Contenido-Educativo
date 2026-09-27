@@ -86,6 +86,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initUploadZone();
   initParamListeners();
   initGenerateButton();
+  initQuizInteractivity();
 
   // Cargar historial al iniciar
   loadHistorial();
@@ -264,6 +265,7 @@ function updateGenerateButton() {
       inputNichoCustom.classList.toggle('error', !nichoVal);
     } else {
       selectNicho.classList.toggle('error', !selectNicho.value);
+    }
   }
 }
 
@@ -420,15 +422,39 @@ function hideResult() {
   resultPanel.classList.remove('visible');
 }
 
+// ---------------------------------------------------------------------------
+// Renderers — dispatcher y cinco renderers por formato pedagógico
+// ---------------------------------------------------------------------------
+
 /**
- * Muestra el resultado de la generación.
- * Story 3.2 reemplazará esta función con renderers específicos por formato.
+ * Tabla de dispatch: formato → función renderer.
+ * Las claves coinciden exactamente con los valores de FormatoPedagogico en core/models.py.
+ */
+const RENDERERS = {
+  'Flashcards': renderFlashcards,
+  'Quiz Interactivo': renderQuiz,
+  'Tutorial Paso a Paso': renderTutorial,
+  'Resumen Ejecutivo': renderResumenEjecutivo,
+  'Guion de Clase': renderGuionClase,
+};
+
+/**
+ * Muestra el resultado de la generación despachando al renderer correcto según el formato.
  * @param {object} data - Respuesta completa del endpoint de status.
  */
 function showResult(data) {
   const resultado = data.resultado || {};
-  const formato = resultado.formato || selectFormato.value || 'Resultado';
-  const score = resultado.anclaje_fuente_score ?? null;
+
+  // Resolver el formato: priorizar campo del paquete, luego metadatos, luego el select del form
+  const formato =
+    resultado.formato ||
+    (resultado.metadatos && resultado.metadatos.formato_generado) ||
+    selectFormato.value ||
+    'Resultado';
+  const score =
+    (resultado.evaluacion_calidad && resultado.evaluacion_calidad.anclaje_fuente_score != null)
+      ? resultado.evaluacion_calidad.anclaje_fuente_score
+      : (resultado.anclaje_fuente_score ?? null);
 
   resultFormatoBadge.textContent = formato;
 
@@ -439,23 +465,337 @@ function showResult(data) {
     resultScoreDisplay.style.display = 'none';
   }
 
-  // Placeholder de resultado — Story 3.2 implementará los renderers
-  resultContent.innerHTML = renderResultPlaceholder(resultado);
+  const contenido = resultado.contenido_adaptado || {};
+  const renderer = RENDERERS[formato];
+  resultContent.innerHTML = renderer ? renderer(contenido) : renderResultPlaceholder(resultado);
   resultPanel.classList.add('visible');
 }
 
+// ---------------------------------------------------------------------------
+// Renderer: Flashcards (flip 3D con CSS)
+// ---------------------------------------------------------------------------
+
 /**
- * Renderizado provisional del resultado (Story 3.2 implementará los renderers reales).
+ * Genera HTML para el resultado en formato Flashcards.
+ * @param {object} contenido - contenido_adaptado del paquete
+ * @returns {string} HTML
+ */
+function renderFlashcards(contenido) {
+  const items = contenido.items || [];
+  const titulo = escapeHtml(contenido.titulo || 'Flashcards');
+  const intro = escapeHtml(contenido.introduccion_contextualizada || '');
+
+  let html = `
+    <div class="renderer-intro">
+      <h2 class="renderer-titulo">${titulo}</h2>
+      ${intro ? `<p class="renderer-intro-text">${intro}</p>` : ''}
+      <div class="renderer-meta">${items.length} tarjeta${items.length !== 1 ? 's' : ''} — haz clic para revelar el dorso</div>
+    </div>`;
+
+  if (items.length === 0) {
+    return html + '<div class="renderer-empty">No se generaron flashcards.</div>';
+  }
+
+  html += '<div class="flashcards-grid">';
+  items.forEach((item, idx) => {
+    html += `
+      <div
+        class="flashcard"
+        tabindex="0"
+        role="button"
+        aria-label="Tarjeta ${idx + 1}: ${escapeHtml(item.frente)}"
+      >
+        <div class="flashcard-inner">
+          <div class="flashcard-front">
+            <p>${escapeHtml(item.frente)}</p>
+          </div>
+          <div class="flashcard-back">
+            <p>${escapeHtml(item.dorso)}</p>
+            ${item.pista_didactica ? `<p class="flashcard-pista">💡 ${escapeHtml(item.pista_didactica)}</p>` : ''}
+          </div>
+        </div>
+      </div>`;
+  });
+  html += '</div>';
+  return html;
+}
+
+// ---------------------------------------------------------------------------
+// Renderer: Quiz Interactivo
+// ---------------------------------------------------------------------------
+
+/**
+ * Genera HTML para el resultado en formato Quiz Interactivo.
+ * La interactividad (selección de opción) se maneja via event delegation en resultContent.
+ * @param {object} contenido - contenido_adaptado del paquete
+ * @returns {string} HTML
+ */
+function renderQuiz(contenido) {
+  const items = contenido.items || [];
+  const titulo = escapeHtml(contenido.titulo || 'Quiz Interactivo');
+  const intro = escapeHtml(contenido.introduccion_contextualizada || '');
+
+  let html = `
+    <div class="renderer-intro">
+      <h2 class="renderer-titulo">${titulo}</h2>
+      ${intro ? `<p class="renderer-intro-text">${intro}</p>` : ''}
+      <div class="renderer-meta quiz-score-track">
+        0 / ${items.length} respondida${items.length !== 1 ? 's' : ''}
+      </div>
+    </div>`;
+
+  if (items.length === 0) {
+    return html + '<div class="renderer-empty">No se generaron preguntas.</div>';
+  }
+
+  items.forEach((item, idx) => {
+    const opciones = item.opciones || [];
+    html += `
+      <div
+        class="quiz-question"
+        data-answered="false"
+        data-correct="${escapeAttr(item.respuesta_correcta)}"
+        data-index="${idx}"
+      >
+        <div class="quiz-question-header">
+          <span class="quiz-question-num">Pregunta ${idx + 1}</span>
+          <p class="quiz-question-text">${escapeHtml(item.pregunta)}</p>
+        </div>
+        <div class="quiz-options">`;
+    opciones.forEach((opcion) => {
+      html += `
+          <button
+            class="quiz-option"
+            type="button"
+            data-value="${escapeAttr(opcion)}"
+          >${escapeHtml(opcion)}</button>`;
+    });
+    html += `</div>
+        <div class="quiz-justificacion" style="display:none;">
+          <span class="quiz-just-label">Justificación:</span>
+          <p>${escapeHtml(item.justificacion || '')}</p>
+        </div>
+      </div>`;
+  });
+
+  return html;
+}
+
+// ---------------------------------------------------------------------------
+// Renderer: Tutorial Paso a Paso
+// ---------------------------------------------------------------------------
+
+/**
+ * Genera HTML para el resultado en formato Tutorial Paso a Paso.
+ * @param {object} contenido - contenido_adaptado del paquete
+ * @returns {string} HTML
+ */
+function renderTutorial(contenido) {
+  const items = contenido.items || [];
+  const titulo = escapeHtml(contenido.titulo || 'Tutorial Paso a Paso');
+  const intro = escapeHtml(contenido.introduccion_contextualizada || '');
+
+  let html = `
+    <div class="renderer-intro">
+      <h2 class="renderer-titulo">${titulo}</h2>
+      ${intro ? `<p class="renderer-intro-text">${intro}</p>` : ''}
+      <div class="renderer-meta">${items.length} paso${items.length !== 1 ? 's' : ''}</div>
+    </div>`;
+
+  if (items.length === 0) {
+    return html + '<div class="renderer-empty">No se generaron pasos.</div>';
+  }
+
+  items.forEach((item) => {
+    html += `
+      <div class="tutorial-step">
+        <div class="tutorial-step-header">
+          <span class="tutorial-step-number">${escapeHtml(String(item.paso))}</span>
+          <h3 class="tutorial-step-titulo">${escapeHtml(item.titulo)}</h3>
+        </div>
+        <p class="tutorial-step-explicacion">${escapeHtml(item.explicacion)}</p>
+        ${item.ejemplo ? `<pre class="tutorial-ejemplo">${escapeHtml(item.ejemplo)}</pre>` : ''}
+      </div>`;
+  });
+
+  return html;
+}
+
+// ---------------------------------------------------------------------------
+// Renderer: Resumen Ejecutivo
+// ---------------------------------------------------------------------------
+
+/**
+ * Genera HTML para el resultado en formato Resumen Ejecutivo.
+ * @param {object} contenido - contenido_adaptado del paquete
+ * @returns {string} HTML
+ */
+function renderResumenEjecutivo(contenido) {
+  const items = contenido.items || [];
+  const titulo = escapeHtml(contenido.titulo || 'Resumen Ejecutivo');
+  const intro = escapeHtml(contenido.introduccion_contextualizada || '');
+
+  let html = `
+    <div class="renderer-intro">
+      <h2 class="renderer-titulo">${titulo}</h2>
+      ${intro ? `<p class="renderer-intro-text">${intro}</p>` : ''}
+      <div class="renderer-meta">${items.length} sección${items.length !== 1 ? 'es' : ''}</div>
+    </div>`;
+
+  if (items.length === 0) {
+    return html + '<div class="renderer-empty">No se generaron secciones.</div>';
+  }
+
+  items.forEach((item) => {
+    html += `
+      <div class="resumen-card">
+        <h3 class="resumen-seccion">${escapeHtml(item.seccion)}</h3>
+        <p class="resumen-contenido">${escapeHtml(item.contenido)}</p>
+        ${item.implicacion ? `
+        <div class="resumen-implicacion">
+          <span class="resumen-impl-label">Implicación:</span>
+          <p>${escapeHtml(item.implicacion)}</p>
+        </div>` : ''}
+      </div>`;
+  });
+
+  return html;
+}
+
+// ---------------------------------------------------------------------------
+// Renderer: Guión de Clase
+// ---------------------------------------------------------------------------
+
+/**
+ * Genera HTML para el resultado en formato Guión de Clase.
+ * @param {object} contenido - contenido_adaptado del paquete
+ * @returns {string} HTML
+ */
+function renderGuionClase(contenido) {
+  const items = contenido.items || [];
+  const titulo = escapeHtml(contenido.titulo || 'Guión de Clase');
+  const intro = escapeHtml(contenido.introduccion_contextualizada || '');
+
+  const totalMin = items.reduce((acc, it) => acc + (it.duracion_minutos || 0), 0);
+
+  let html = `
+    <div class="renderer-intro">
+      <h2 class="renderer-titulo">${titulo}</h2>
+      ${intro ? `<p class="renderer-intro-text">${intro}</p>` : ''}
+      <div class="renderer-meta">${items.length} fase${items.length !== 1 ? 's' : ''} · ${totalMin} min totales</div>
+    </div>`;
+
+  if (items.length === 0) {
+    return html + '<div class="renderer-empty">No se generaron fases.</div>';
+  }
+
+  items.forEach((item) => {
+    html += `
+      <div class="guion-fase">
+        <div class="guion-fase-header">
+          <h3 class="guion-fase-nombre">${escapeHtml(item.fase)}</h3>
+          <span class="guion-duracion">${escapeHtml(String(item.duracion_minutos))} min</span>
+        </div>
+        <p class="guion-contenido">${escapeHtml(item.contenido)}</p>
+        ${item.notas_formador ? `
+        <div class="guion-notas">
+          <span class="guion-notas-label">📝 Notas del formador</span>
+          <p>${escapeHtml(item.notas_formador)}</p>
+        </div>` : ''}
+      </div>`;
+  });
+
+  return html;
+}
+
+// ---------------------------------------------------------------------------
+// Fallback: resultado sin renderer específico
+// ---------------------------------------------------------------------------
+
+/**
+ * Renderizado de fallback — muestra el JSON crudo del resultado.
  * @param {object} resultado
  * @returns {string} HTML
  */
 function renderResultPlaceholder(resultado) {
   if (!resultado || Object.keys(resultado).length === 0) {
-    return '<div class="result-placeholder">Resultado recibido. Los renderers detallados se activarán en la próxima versión.</div>';
+    return '<div class="renderer-empty">Resultado recibido sin contenido.</div>';
   }
   const json = JSON.stringify(resultado, null, 2);
   return `<pre class="result-raw">${escapeHtml(json)}</pre>`;
 }
+
+// ---------------------------------------------------------------------------
+// Interactividad del Quiz — Event delegation sobre resultContent
+// ---------------------------------------------------------------------------
+
+/**
+ * Maneja clicks en las opciones del Quiz. Usa event delegation sobre #result-content.
+ * El estado vive exclusivamente en clases CSS y atributos data- del DOM.
+ */
+function initQuizInteractivity() {
+  resultContent.addEventListener('click', (e) => {
+    const btn = e.target.closest('.quiz-option');
+    if (!btn) return;
+
+    const question = btn.closest('.quiz-question');
+    if (!question || question.dataset.answered === 'true') return;
+
+    const correcta = question.dataset.correct;
+    const elegida = btn.dataset.value;
+    const allBtns = question.querySelectorAll('.quiz-option');
+    const justDiv = question.querySelector('.quiz-justificacion');
+
+    // Deshabilitar todos los botones de esta pregunta
+    allBtns.forEach((b) => {
+      b.disabled = true;
+      if (b.dataset.value === correcta) {
+        b.classList.add('correct');
+      }
+    });
+
+    // Marcar la elegida como incorrecta si no es la correcta
+    if (elegida !== correcta) {
+      btn.classList.add('incorrect');
+    }
+
+    // Mostrar justificación
+    if (justDiv) {
+      justDiv.style.display = 'block';
+    }
+
+    // Marcar pregunta como respondida
+    question.dataset.answered = 'true';
+
+    // Actualizar contador de respondidas
+    const panel = resultContent.querySelector('.quiz-score-track');
+    if (panel) {
+      const total = resultContent.querySelectorAll('.quiz-question').length;
+      const respondidas = resultContent.querySelectorAll('.quiz-question[data-answered="true"]').length;
+      panel.textContent = `${respondidas} / ${total} respondida${total !== 1 ? 's' : ''}`;
+    }
+  });
+
+  // Soporte teclado para flashcards (Enter / Space)
+  resultContent.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      const card = e.target.closest('.flashcard');
+      if (card) {
+        e.preventDefault();
+        card.classList.toggle('flipped');
+      }
+    }
+  });
+
+  // Flip en click para flashcards
+  resultContent.addEventListener('click', (e) => {
+    const card = e.target.closest('.flashcard');
+    if (card) {
+      card.classList.toggle('flipped');
+    }
+  });
+}
+
 
 /**
  * Resetea la interfaz al estado inicial para un nuevo intento.

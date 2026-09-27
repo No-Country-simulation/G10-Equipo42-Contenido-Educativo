@@ -24,3 +24,9 @@
 - source_spec: `_bmad-output/implementation-artifacts/spec-3-1-upload-de-documentos-y-configuracion-de-parametros.md`
   summary: Sin test automatizado para GET /historial con OCI habilitado (con objetos reales en bucket)
   evidence: VG-1 — Solo se verificó el caso OCI deshabilitado (retorna lista vacía). El caso con OCI habilitado requiere un bucket real o mocks del SDK que el proyecto aún no tiene. Pre-existente al cambio; mismo patrón que Epics 1 y 2.
+- source_spec: `_bmad-output/implementation-artifacts/spec-3-2-generacion-con-feedback-de-progreso-y-visualizacion-de-resul.md`
+  summary: Agregar ARIA live region para anunciar feedback de selección en Quiz Interactivo a usuarios de lector de pantalla
+  evidence: BH-4 — Los botones de opción del Quiz no tienen `aria-live="polite"` ni actualización de `aria-disabled`/`aria-pressed` al ser seleccionados. El feedback visual (colores correcto/incorrecto + justificación) no es perceptible sin visión. Cosmético para MVP; debería cerrarse en una story de accesibilidad.
+- source_spec: `_bmad-output/implementation-artifacts/spec-3-2-generacion-con-feedback-de-progreso-y-visualizacion-de-resul.md`
+  summary: Sin tests automatizados para los renderers de formato pedagógico (renderFlashcards, renderQuiz, etc.)
+  evidence: VG-1 — Patrón pre-existente del proyecto (verificación manual). Los renderers son funciones puras que retornan HTML; serían fáciles de cubrir con pruebas de snapshot en Jest o similar. Debería cerrarse en una story de calidad con suite de tests JS.

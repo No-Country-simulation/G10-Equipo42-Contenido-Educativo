@@ -880,3 +880,438 @@ body::before {
     flex-shrink: 0;
   }
 }
+
+/* =========================================================
+   Renderers de Formato Pedagógico — Story 3.2
+   ========================================================= */
+
+/* ---------------------------------------------------------
+   Intro común a todos los renderers
+   --------------------------------------------------------- */
+.renderer-intro {
+  margin-bottom: 24px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.renderer-titulo {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+}
+
+.renderer-intro-text {
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.65;
+  margin-bottom: 10px;
+}
+
+.renderer-meta {
+  font-size: 12px;
+  color: var(--text-muted);
+  font-weight: 500;
+  letter-spacing: 0.03em;
+}
+
+.renderer-empty {
+  text-align: center;
+  padding: 32px;
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+/* ---------------------------------------------------------
+   Flashcards — grid + flip 3D
+   --------------------------------------------------------- */
+.flashcards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 16px;
+}
+
+.flashcard {
+  perspective: 800px;
+  height: 200px;
+  cursor: pointer;
+  outline: none;
+}
+
+.flashcard:focus-visible .flashcard-inner {
+  box-shadow: 0 0 0 3px var(--accent-from);
+}
+
+.flashcard-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  transition: transform 0.5s cubic-bezier(0.4, 0.2, 0.2, 1);
+  border-radius: var(--radius-md);
+}
+
+.flashcard.flipped .flashcard-inner {
+  transform: rotateY(180deg);
+}
+
+.flashcard-front,
+.flashcard-back {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  border-radius: var(--radius-md);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  text-align: center;
+}
+
+.flashcard-front {
+  background: var(--bg-card);
+  border: 1px solid var(--border-medium);
+}
+
+.flashcard-front p {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  line-height: 1.5;
+}
+
+.flashcard-back {
+  background: linear-gradient(135deg, rgba(124, 58, 237, 0.15), rgba(37, 99, 235, 0.12));
+  border: 1px solid var(--border-accent);
+  transform: rotateY(180deg);
+  gap: 12px;
+}
+
+.flashcard-back p {
+  font-size: 13px;
+  color: var(--text-primary);
+  line-height: 1.55;
+}
+
+.flashcard-pista {
+  font-size: 12px !important;
+  color: var(--text-accent) !important;
+  font-style: italic;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding-top: 10px;
+  width: 100%;
+}
+
+/* ---------------------------------------------------------
+   Quiz Interactivo
+   --------------------------------------------------------- */
+.quiz-score-track {
+  font-size: 12px;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.quiz-question {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 20px;
+  margin-bottom: 16px;
+  backdrop-filter: blur(6px);
+}
+
+.quiz-question[data-answered="true"] {
+  border-color: var(--border-medium);
+}
+
+.quiz-question-header {
+  margin-bottom: 14px;
+}
+
+.quiz-question-num {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+}
+
+.quiz-question-text {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  line-height: 1.55;
+}
+
+.quiz-options {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.quiz-option {
+  width: 100%;
+  padding: 10px 16px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-family: inherit;
+  font-size: 13px;
+  text-align: left;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.quiz-option:not(:disabled):hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: var(--border-accent);
+}
+
+.quiz-option:disabled {
+  cursor: default;
+}
+
+.quiz-option.correct {
+  background: rgba(16, 185, 129, 0.12);
+  border-color: rgba(16, 185, 129, 0.5);
+  color: var(--color-success);
+  font-weight: 600;
+}
+
+.quiz-option.incorrect {
+  background: rgba(248, 113, 113, 0.1);
+  border-color: rgba(248, 113, 113, 0.45);
+  color: var(--color-error);
+}
+
+.quiz-justificacion {
+  margin-top: 14px;
+  padding: 12px 16px;
+  background: rgba(255, 255, 255, 0.03);
+  border-left: 3px solid var(--accent-from);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  animation: fadeIn var(--transition-base);
+}
+
+.quiz-just-label {
+  display: block;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-accent);
+  margin-bottom: 4px;
+}
+
+.quiz-justificacion p {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.55;
+}
+
+/* ---------------------------------------------------------
+   Tutorial Paso a Paso
+   --------------------------------------------------------- */
+.tutorial-step {
+  position: relative;
+  padding: 20px 20px 20px 64px;
+  margin-bottom: 16px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  backdrop-filter: blur(6px);
+}
+
+.tutorial-step-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 10px;
+}
+
+.tutorial-step-number {
+  position: absolute;
+  left: 18px;
+  top: 20px;
+  width: 28px;
+  height: 28px;
+  background: var(--accent-gradient);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  color: white;
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(124, 58, 237, 0.35);
+}
+
+.tutorial-step-titulo {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+  line-height: 1.4;
+}
+
+.tutorial-step-explicacion {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.65;
+  margin-bottom: 12px;
+}
+
+.tutorial-step-explicacion:last-child {
+  margin-bottom: 0;
+}
+
+.tutorial-ejemplo {
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-size: 12px;
+  color: var(--text-secondary);
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+  margin-top: 10px;
+}
+
+/* ---------------------------------------------------------
+   Resumen Ejecutivo
+   --------------------------------------------------------- */
+.resumen-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 20px;
+  margin-bottom: 12px;
+  backdrop-filter: blur(6px);
+  transition: border-color var(--transition-fast);
+}
+
+.resumen-card:hover {
+  border-color: var(--border-medium);
+}
+
+.resumen-seccion {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-accent);
+  margin-bottom: 8px;
+}
+
+.resumen-contenido {
+  font-size: 14px;
+  color: var(--text-primary);
+  line-height: 1.65;
+  margin-bottom: 12px;
+}
+
+.resumen-implicacion {
+  padding: 10px 14px;
+  background: rgba(124, 58, 237, 0.08);
+  border-left: 3px solid var(--accent-from);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+}
+
+.resumen-impl-label {
+  display: block;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-accent);
+  margin-bottom: 4px;
+}
+
+.resumen-implicacion p {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.55;
+}
+
+/* ---------------------------------------------------------
+   Guión de Clase
+   --------------------------------------------------------- */
+.guion-fase {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 20px;
+  margin-bottom: 12px;
+  backdrop-filter: blur(6px);
+  position: relative;
+}
+
+.guion-fase-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.guion-fase-nombre {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.guion-duracion {
+  flex-shrink: 0;
+  padding: 3px 10px;
+  background: rgba(124, 58, 237, 0.15);
+  border: 1px solid var(--border-accent);
+  border-radius: 99px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-accent);
+  white-space: nowrap;
+}
+
+.guion-contenido {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.65;
+  margin-bottom: 10px;
+}
+
+.guion-contenido:last-child {
+  margin-bottom: 0;
+}
+
+.guion-notas {
+  padding: 10px 14px;
+  background: rgba(251, 191, 36, 0.06);
+  border-left: 3px solid rgba(251, 191, 36, 0.5);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  margin-top: 10px;
+}
+
+.guion-notas-label {
+  display: block;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-warning);
+  margin-bottom: 4px;
+}
+
+.guion-notas p {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.55;
+}
