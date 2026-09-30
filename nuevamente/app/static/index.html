@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NuevaMente — Adaptación de Documentos Técnicos</title>
+  <meta name="description" content="Transforma documentación técnica en paquetes educativos personalizados con inteligencia artificial. Selecciona perfil, formato pedagógico y sector.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <div class="app-layout">
+
+    <!-- ===================== SIDEBAR — HISTORIAL ===================== -->
+    <aside class="sidebar" aria-label="Historial de generaciones">
+      <div class="sidebar-header">
+        <div class="sidebar-title">Historial</div>
+        <div class="sidebar-count" id="hist-count">Cargando...</div>
+      </div>
+      <nav class="sidebar-list" id="sidebar-list" aria-live="polite">
+        <div class="sidebar-loading">
+          <span class="spinner" style="width:14px;height:14px;border-width:2px;margin-right:0"></span>
+          Cargando historial...
+        </div>
+      </nav>
+    </aside>
+
+    <!-- ===================== ÁREA PRINCIPAL ===================== -->
+    <div class="main-area">
+
+      <!-- Header -->
+      <header class="app-header">
+        <div class="app-logo">
+          <div class="app-logo-icon" aria-hidden="true">🧠</div>
+          <div>
+            <span class="app-logo-name">NuevaMente</span>
+            <span class="app-logo-tagline">— Adaptación Pedagógica con IA</span>
+          </div>
+        </div>
+      </header>
+
+      <!-- Contenido scrollable -->
+      <main class="main-content" id="main-content">
+        <div class="input-panel" id="input-panel">
+
+          <!-- Títulos -->
+          <h1 class="section-title">Transformar Documento</h1>
+          <p class="section-subtitle">
+            Sube un documento técnico, configura los parámetros de adaptación y genera un paquete educativo personalizado.
+          </p>
+
+          <!-- ===== ZONA DE UPLOAD ===== -->
+          <div
+            class="upload-zone"
+            id="upload-zone"
+            role="button"
+            tabindex="0"
+            aria-label="Zona de carga de documento. Arrastra un archivo o haz clic para seleccionar."
+          >
+            <input
+              type="file"
+              id="file-input"
+              accept=".pdf,.md,.txt,text/plain,text/markdown,application/pdf"
+              aria-hidden="true"
+            >
+            <div class="upload-zone-content">
+              <span class="upload-icon" aria-hidden="true">📄</span>
+              <div class="upload-title">Arrastra tu documento aquí</div>
+              <div class="upload-subtitle">o haz clic para seleccionarlo</div>
+              <div class="upload-formats">
+                <span class="upload-format-badge">PDF</span>
+                <span class="upload-format-badge">.md</span>
+                <span class="upload-format-badge">.txt</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Info de archivo seleccionado (oculto inicialmente) -->
+          <div id="file-info" class="file-info" style="display:none; margin-top:-12px; margin-bottom:12px;">
+            <span class="file-info-icon" aria-hidden="true">✅</span>
+            <span class="file-info-name" id="file-info-name"></span>
+            <button class="file-info-clear" id="btn-clear-file" aria-label="Quitar archivo" title="Quitar archivo">✕</button>
+          </div>
+
+          <!-- Error de archivo (oculto inicialmente) -->
+          <div id="file-error" class="file-error" style="display:none; margin-top:-12px; margin-bottom:12px;" role="alert">
+            <span aria-hidden="true">⚠️</span>
+            <span id="file-error-text"></span>
+          </div>
+
+          <!-- ===== PARÁMETROS ===== -->
+          <div class="params-card">
+            <div class="params-title">Parámetros de Adaptación</div>
+
+            <!-- Perfil del Destinatario -->
+            <div class="param-group">
+              <label class="param-label" for="select-perfil">
+                Perfil del Destinatario <span class="required" aria-hidden="true">*</span>
+              </label>
+              <select
+                class="param-select"
+                id="select-perfil"
+                name="perfil_destinatario"
+                required
+                aria-required="true"
+              >
+                <option value="" disabled selected>Selecciona un perfil...</option>
+                <option value="Principiante">Principiante</option>
+                <option value="Junior">Junior</option>
+                <option value="Senior">Senior</option>
+                <option value="Lider Tecnico/Arquitecto">Líder Técnico / Arquitecto</option>
+              </select>
+            </div>
+
+            <!-- Formato Pedagógico -->
+            <div class="param-group">
+              <label class="param-label" for="select-formato">
+                Formato Pedagógico <span class="required" aria-hidden="true">*</span>
+              </label>
+              <select
+                class="param-select"
+                id="select-formato"
+                name="formato_salida"
+                required
+                aria-required="true"
+              >
+                <option value="" disabled selected>Selecciona un formato...</option>
+                <option value="Flashcards">Flashcards</option>
+                <option value="Quiz Interactivo">Quiz Interactivo</option>
+                <option value="Tutorial Paso a Paso">Tutorial Paso a Paso</option>
+                <option value="Resumen Ejecutivo">Resumen Ejecutivo</option>
+                <option value="Guion de Clase">Guión de Clase</option>
+              </select>
+            </div>
+
+            <!-- Nicho / Contexto -->
+            <div class="param-group">
+              <label class="param-label" for="select-nicho">
+                Nicho / Contexto <span class="required" aria-hidden="true">*</span>
+              </label>
+              <div class="nicho-wrapper">
+                <select
+                  class="param-select"
+                  id="select-nicho"
+                  name="nicho_predefinido"
+                  aria-label="Selecciona un nicho predefinido o escribe uno personalizado abajo"
+                >
+                  <option value="">Selecciona un nicho predefinido...</option>
+                  <option value="General">General</option>
+                  <option value="Fintech">Fintech</option>
+                  <option value="Salud">Salud</option>
+                  <option value="E-commerce">E-commerce</option>
+                  <option value="__custom__">✏️ Nicho personalizado...</option>
+                </select>
+                <input
+                  type="text"
+                  class="param-input"
+                  id="input-nicho-custom"
+                  name="nicho_custom"
+                  placeholder="Escribe tu nicho personalizado (ej: veterinarios aprendiendo a programar)"
+                  style="display:none;"
+                  aria-label="Nicho personalizado"
+                  maxlength="200"
+                >
+              </div>
+            </div>
+          </div>
+
+          <!-- ===== BOTÓN GENERAR ===== -->
+          <button
+            class="btn-generate"
+            id="btn-generate"
+            type="button"
+            disabled
+            aria-disabled="true"
+          >
+            Generar Paquete Educativo
+          </button>
+
+          <!-- ===== PANEL DE PROGRESO ===== -->
+          <div class="progress-panel" id="progress-panel" role="status" aria-live="polite">
+            <div class="progress-title">
+              <span class="spinner"></span>
+              Generando tu paquete educativo...
+            </div>
+            <div class="progress-message" id="progress-message">
+              Procesando documento e iniciando pipeline...
+            </div>
+            <div class="progress-bar-track">
+              <div class="progress-bar-fill"></div>
+            </div>
+          </div>
+
+          <!-- ===== PANEL DE ERROR ===== -->
+          <div class="error-panel" id="error-panel" role="alert">
+            <div class="error-panel-title">❌ Error en la generación</div>
+            <div class="error-panel-message" id="error-message">
+              Ocurrió un error durante el procesamiento.
+            </div>
+            <button class="btn-retry" id="btn-retry" type="button">
+              Reintentar
+            </button>
+          </div>
+
+          <!-- ===== PANEL DE RESULTADO ===== -->
+          <div class="result-panel" id="result-panel">
+            <div class="result-header">
+              <span class="result-badge" id="result-formato-badge">Resultado</span>
+              <span class="result-score" id="result-score-display" style="display:none;">
+                Fidelidad: <span class="result-score-value" id="result-score-value">—</span>
+              </span>
+            </div>
+            <!-- El contenido del resultado lo inyectará app.js / Story 3.2 -->
+            <div id="result-content">
+              <div class="result-placeholder">
+                El resultado se mostrará aquí una vez completada la generación.
+              </div>
+            </div>
+          </div>
+
+        </div><!-- /input-panel -->
+      </main><!-- /main-content -->
+    </div><!-- /main-area -->
+  </div><!-- /app-layout -->
+
+  <script src="/static/app.js" defer></script>
+</body>
+</html>
