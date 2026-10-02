@@ -1315,3 +1315,43 @@ body::before {
   color: var(--text-secondary);
   line-height: 1.55;
 }
+/* =========================================================
+   AJUSTES RESPONSIVOS DE COMPONENTES (Móviles y Tablets)
+   ========================================================= */
+@media (max-width: 768px) {
+  /* Reduce los rellenos internos para que el texto tenga espacio */
+  .upload-zone {
+    padding: 24px 16px;
+  }
+  
+  .params-card, 
+  .progress-panel, 
+  .result-panel {
+    padding: 16px;
+  }
+
+  /* Evita que las flashcards se aplasten forzando 1 sola columna */
+  .flashcards-grid {
+    grid-template-columns: 1fr;
+  }
+
+  /* Acerca el círculo numérico hacia la izquierda en pantallas pequeñas */
+  .tutorial-step {
+    padding: 16px 16px 16px 48px;
+  }
+  
+  .tutorial-step-number {
+    left: 12px;
+    top: 16px;
+    width: 24px;
+    height: 24px;
+    font-size: 11px;
+  }
+
+  /* Alinea correctamente el título y el tiempo del guion */
+  .guion-fase-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+}

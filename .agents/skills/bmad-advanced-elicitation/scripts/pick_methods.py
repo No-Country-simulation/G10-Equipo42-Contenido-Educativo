@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # /// script
-# requires-python = ">=3.10"
+# requires-python = ">=3.11"
 # ///
 """Serve the elicitation method catalog without loading it all into context.
 
@@ -31,6 +31,7 @@ categories are first-class and number-addressable everywhere.
 
 Default output is lean tab-separated text for an LLM to read; --json for structured.
 """
+
 import argparse
 import csv
 import json
@@ -163,8 +164,7 @@ def fmt_rows(rows: list[dict], as_json: bool) -> str:
     if as_json:
         return json.dumps([{k: r[k] for k in FIELDS} for r in rows])
     return "\n".join(
-        f"{r['num']}\t{r['category']}\t{r['method_name']}\t{r['description']}\t{r['output_pattern']}"
-        for r in rows
+        f"{r['num']}\t{r['category']}\t{r['method_name']}\t{r['description']}\t{r['output_pattern']}" for r in rows
     )
 
 
@@ -230,4 +230,8 @@ def main(argv: list[str] | None = None) -> int:
 
 
 if __name__ == "__main__":
+    if sys.platform == "win32":
+        # Piped output on Windows defaults to a legacy code page, not UTF-8.
+        sys.stdout.reconfigure(encoding="utf-8")
+        sys.stderr.reconfigure(encoding="utf-8")
     sys.exit(main())

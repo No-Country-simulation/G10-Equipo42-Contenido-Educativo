@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 # /// script
-# requires-python = ">=3.10"
+# requires-python = ">=3.11"
 # ///
 """Tests for recon_kit.py."""
 
 import io
 import json
 import sys
+import tempfile
 import unittest
 from contextlib import redirect_stdout
 from datetime import date
@@ -62,12 +63,10 @@ def run(argv):
 
 class CitationsTest(unittest.TestCase):
     def test_cross_check(self):
-        report = Path(__file__).parent / "_report.md"
-        report.write_text(REPORT, encoding="utf-8")
-        try:
+        with tempfile.TemporaryDirectory() as tmp:
+            report = Path(tmp) / "report.md"
+            report.write_text(REPORT, encoding="utf-8")
             code, result = run(["citations", str(report)])
-        finally:
-            report.unlink()
         self.assertEqual(result["dangling_markers"], [4])
         self.assertEqual(result["orphaned_rows"], [3])
         self.assertNotIn(9, result["markers"])  # fenced content ignored
@@ -76,12 +75,10 @@ class CitationsTest(unittest.TestCase):
 
 class TallyTest(unittest.TestCase):
     def test_last_status_wins_per_ref(self):
-        log = Path(__file__).parent / "_memlog.md"
-        log.write_text(MEMLOG, encoding="utf-8")
-        try:
+        with tempfile.TemporaryDirectory() as tmp:
+            log = Path(tmp) / "memlog.md"
+            log.write_text(MEMLOG, encoding="utf-8")
             code, result = run(["tally", str(log)])
-        finally:
-            log.unlink()
         self.assertEqual(result["by_type"]["claim"], 4)
         self.assertEqual(result["claims"], {"unverified": 1, "verified": 2})
         self.assertEqual(result["claims_total"], 3)  # ref=[2] counted once
@@ -94,21 +91,26 @@ class StalenessTest(unittest.TestCase):
         self.assertEqual(add_months(date(2026, 1, 31), 1), date(2026, 2, 28))
 
     def test_windows(self):
-        claims = json.dumps([
-            {"claim": "sizing", "class": "size/growth", "pub_date": "2024-06"},
-            {"claim": "pricing", "class": "pricing", "pub_date": "2026-06"},
-            {"claim": "odd", "class": "unmapped", "pub_date": "2026-06"},
-        ])
-        f = Path(__file__).parent / "_claims.json"
-        f.write_text(claims, encoding="utf-8")
-        try:
-            code, result = run([
-                "staleness", str(f),
-                "--windows", '{"size/growth": 18, "pricing": 3}',
-                "--today", "2026-07-22",
-            ])
-        finally:
-            f.unlink()
+        claims = json.dumps(
+            [
+                {"claim": "sizing", "class": "size/growth", "pub_date": "2024-06"},
+                {"claim": "pricing", "class": "pricing", "pub_date": "2026-06"},
+                {"claim": "odd", "class": "unmapped", "pub_date": "2026-06"},
+            ]
+        )
+        with tempfile.TemporaryDirectory() as tmp:
+            f = Path(tmp) / "claims.json"
+            f.write_text(claims, encoding="utf-8")
+            code, result = run(
+                [
+                    "staleness",
+                    str(f),
+                    "--windows",
+                    '{"size/growth": 18, "pricing": 3}',
+                    "--today",
+                    "2026-07-22",
+                ]
+            )
         self.assertEqual(result["stale_count"], 1)  # sizing recheck 2025-12 < today
         self.assertEqual(result["earliest_recheck"], "2025-12-01")
         self.assertEqual(result["no_window_classes"], ["unmapped"])
@@ -118,20 +120,23 @@ class StalenessTest(unittest.TestCase):
 class SlugTest(unittest.TestCase):
     def test_deterministic_folder(self):
         self.assertEqual(slugify("Créme Brûlée: AI Tools!"), "creme-brulee-ai-tools")
-        code, result = run(["slug", "SMB Accounting SaaS", "--type", "market",
-                            "--date", "2026-07-22"])
+        code, result = run(["slug", "SMB Accounting SaaS", "--type", "market"])
+        self.assertEqual(result["folder"], "research-smb-accounting-saas")
+        self.assertEqual(code, 0)
+        pattern = "{research_type}-{topic_slug}-{date}"
+        code, result = run(
+            ["slug", "SMB Accounting SaaS", "--type", "market", "--date", "2026-07-22", "--pattern", pattern]
+        )
         self.assertEqual(result["folder"], "market-smb-accounting-saas-2026-07-22")
         self.assertEqual(code, 0)
 
 
 class EscapeSourcesTest(unittest.TestCase):
     def test_escaping_and_url_validation(self):
-        report = Path(__file__).parent / "_report.md"
-        report.write_text(REPORT, encoding="utf-8")
-        try:
+        with tempfile.TemporaryDirectory() as tmp:
+            report = Path(tmp) / "report.md"
+            report.write_text(REPORT, encoding="utf-8")
             code, result = run(["escape-sources", str(report)])
-        finally:
-            report.unlink()
         self.assertEqual(result["rows"], 3)
         self.assertTrue(any(u.startswith("javascript:") for u in result["invalid_urls"]))
         self.assertNotIn("javascript:", result["html"])  # never linked

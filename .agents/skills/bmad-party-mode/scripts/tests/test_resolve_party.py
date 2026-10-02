@@ -26,14 +26,17 @@ class TestAlias(unittest.TestCase):
     def test_passes_through_unprefixed(self):
         self.assertEqual(rp._alias("morpheus"), "morpheus")
 
+    def test_strips_a_module_prefix_before_agent(self):
+        self.assertEqual(rp._alias("bmad-cis-agent-storyteller"), "storyteller")
+
 
 class TestBuildCollective(unittest.TestCase):
     def test_installed_agents_indexed_by_code_alias_and_name(self):
         col, idx, _ = rp.build_collective(AGENTS, [])
         self.assertEqual(set(col), {"bmad-agent-analyst", "bmad-agent-pm"})
-        self.assertEqual(idx["analyst"], "bmad-agent-analyst")      # alias
-        self.assertEqual(idx["mary"], "bmad-agent-analyst")         # name (ci)
-        self.assertEqual(idx["bmad-agent-pm"], "bmad-agent-pm")     # full code
+        self.assertEqual(idx["analyst"], "bmad-agent-analyst")  # alias
+        self.assertEqual(idx["mary"], "bmad-agent-analyst")  # name (ci)
+        self.assertEqual(idx["bmad-agent-pm"], "bmad-agent-pm")  # full code
         self.assertEqual(col["bmad-agent-analyst"]["source"], "installed")
 
     def test_custom_member_appends(self):
@@ -76,10 +79,13 @@ class TestGroups(unittest.TestCase):
 
     def test_menu_is_names_only_with_counts_and_open_cast_flag(self):
         menu = rp.group_menu(self.GROUPS)
-        self.assertEqual(menu, [
-            {"id": "wr", "name": "Writers", "member_count": 2},
-            {"id": "bad", "name": "bad", "member_count": 0, "open_cast": True},
-        ])
+        self.assertEqual(
+            menu,
+            [
+                {"id": "wr", "name": "Writers", "member_count": 2},
+                {"id": "bad", "name": "bad", "member_count": 0, "open_cast": True},
+            ],
+        )
 
     def test_find_group(self):
         self.assertEqual(rp.find_group(self.GROUPS, "wr")["name"], "Writers")
@@ -91,15 +97,18 @@ class TestGroupDetail(unittest.TestCase):
         self.col, self.idx, _ = rp.build_collective(AGENTS, [{"code": "morpheus", "name": "Morpheus"}])
 
     def test_scene_passes_through_when_present(self):
-        g = {"id": "tos-10-forward", "name": "Ten Forward", "members": ["morpheus"],
-             "scene": "Late evening, a few rounds in."}
+        g = {
+            "id": "tos-10-forward",
+            "name": "Ten Forward",
+            "members": ["morpheus"],
+            "scene": "Late evening, a few rounds in.",
+        }
         d = rp.group_detail(g, self.col, self.idx)
         self.assertEqual(d["scene"], "Late evening, a few rounds in.")
         self.assertEqual([m["code"] for m in d["members"]], ["morpheus"])
 
     def test_scene_omitted_when_absent_or_empty(self):
-        for g in ({"id": "g", "members": ["morpheus"]},
-                  {"id": "g", "members": ["morpheus"], "scene": ""}):
+        for g in ({"id": "g", "members": ["morpheus"]}, {"id": "g", "members": ["morpheus"], "scene": ""}):
             self.assertNotIn("scene", rp.group_detail(g, self.col, self.idx))
 
     def test_anchored_group_is_not_open_cast(self):
@@ -107,8 +116,11 @@ class TestGroupDetail(unittest.TestCase):
         self.assertNotIn("open_cast", rp.group_detail(g, self.col, self.idx))
 
     def test_open_cast_group_flagged_with_empty_members(self):
-        g = {"id": "rebels", "name": "Star Wars Rebels",
-             "scene": "Figures from the Rebels universe drop in as the topic calls for them."}
+        g = {
+            "id": "rebels",
+            "name": "Star Wars Rebels",
+            "scene": "Figures from the Rebels universe drop in as the topic calls for them.",
+        }
         d = rp.group_detail(g, self.col, self.idx)
         self.assertTrue(d["open_cast"])
         self.assertEqual(d["members"], [])
@@ -127,11 +139,14 @@ class TestInstalledCodesIsDefaultRoom(unittest.TestCase):
     """The default room is installed agents only; pure customs stay in the pool."""
 
     def test_pure_custom_excluded_override_kept_in_default_room(self):
-        col, _, installed = rp.build_collective(AGENTS, [
-            {"code": "morpheus", "name": "Morpheus"},                 # pure custom
-            {"code": "analyst", "name": "Mary-Custom", "persona": "p"},  # override
-            {"code": "sec-hawk", "name": "Vex"},                      # shipped crew member
-        ])
+        col, _, installed = rp.build_collective(
+            AGENTS,
+            [
+                {"code": "morpheus", "name": "Morpheus"},  # pure custom
+                {"code": "analyst", "name": "Mary-Custom", "persona": "p"},  # override
+                {"code": "sec-hawk", "name": "Vex"},  # shipped crew member
+            ],
+        )
         # Pure customs are in the pool...
         self.assertIn("morpheus", col)
         self.assertIn("sec-hawk", col)
@@ -141,6 +156,65 @@ class TestInstalledCodesIsDefaultRoom(unittest.TestCase):
         self.assertEqual(default_room, ["bmad-agent-analyst", "bmad-agent-pm"])
         # An override keeps its installed slot (and its custom content).
         self.assertEqual(col["bmad-agent-analyst"]["name"], "Mary-Custom")
+
+
+class TestRoster(unittest.TestCase):
+    GUESTS = {
+        "pip": {"name": "Pip", "persona": "Asks why."},
+        "bmad-agent-dev": {"name": "Amelia", "persona": "Exact.", "skill": "bmad-agent-dev", "installed": False},
+    }
+
+    def test_guests_join_the_pool_and_never_the_default_room(self):
+        col, idx, installed = rp.build_collective(AGENTS, [], self.GUESTS)
+        self.assertEqual(installed, ["bmad-agent-analyst", "bmad-agent-pm"])
+        self.assertEqual(col["pip"]["source"], "roster")
+        self.assertEqual(idx["amelia"], "bmad-agent-dev")
+        self.assertIs(col["bmad-agent-dev"]["installed"], False)
+
+    def test_a_group_can_seat_a_guest_and_an_agent_whose_skill_is_absent(self):
+        col, idx, _ = rp.build_collective(AGENTS, [], self.GUESTS)
+        detail = rp.group_detail({"id": "room", "members": ["analyst", "pip", "dev"]}, col, idx)
+        self.assertEqual([m["name"] for m in detail["members"]], ["Mary", "Pip", "Amelia"])
+        self.assertEqual(detail["unresolved"], [])
+
+    def test_a_short_alias_two_codes_claim_resolves_to_neither(self):
+        agents = {"bmad-agent-dev": {"name": "Amelia"}, "bmad-cis-agent-dev": {"name": "Devi"}}
+        col, idx, _ = rp.build_collective(agents, [])
+        members, unresolved = rp.resolve_members(["dev", "bmad-cis-agent-dev", "amelia"], col, idx)
+        self.assertEqual([m["name"] for m in members], ["Devi", "Amelia"])
+        self.assertEqual(unresolved, ["dev"])
+
+    def test_what_the_roster_could_not_use_is_passed_on(self):
+        absent = "module record bmod-demo is not installed; it is named by demo-one; install it with `npx skills add acme/tools --skill bmod-demo`"
+        report = {
+            "agents": {},
+            "problems": [
+                {"kind": "member", "problem": "demo: member 'x' is already defined by other"},
+                {
+                    "kind": "module",
+                    "bmod": "bmod-demo",
+                    "install": "npx skills add acme/tools --skill bmod-demo",
+                    "problem": absent,
+                },
+            ],
+        }
+        original = rp._run_json
+        rp._run_json = lambda cmd: report
+        try:
+            problems = rp.load_roster(Path("project"), Path("skill"))[4]
+        finally:
+            rp._run_json = original
+        self.assertEqual(problems, ["demo: member 'x' is already defined by other", absent])
+
+    def test_a_custom_group_replaces_a_roster_group_with_its_id(self):
+        groups = rp.merge_groups(
+            [{"id": "room", "name": "Shipped"}, {"id": "other", "name": "Other"}], [{"id": "room", "name": "Mine"}]
+        )
+        self.assertEqual([(g["id"], g["name"]) for g in groups], [("room", "Mine"), ("other", "Other")])
+
+    def test_an_install_from_before_rosters_keeps_its_description_as_the_persona(self):
+        col, _, _ = rp.build_collective({"bmad-agent-pm": {"name": "John", "description": "Asks why."}}, [])
+        self.assertEqual(col["bmad-agent-pm"]["persona"], "Asks why.")
 
 
 class TestResolverInvocation(unittest.TestCase):
@@ -162,6 +236,13 @@ class TestResolverInvocation(unittest.TestCase):
             cmd = self._captured_command(tmp)
             self.assertIn("--project-root", cmd)
             self.assertEqual(cmd[cmd.index("--project-root") + 1], str(Path(tmp) / "project"))
+
+
+class TestArguments(unittest.TestCase):
+    def test_group_is_an_alias_of_party(self):
+        for flag in ("--party", "--group"):
+            args = rp.build_parser().parse_args(["--project-root", "p", "--skill", "s", flag, "writers-room"])
+            self.assertEqual(args.party, "writers-room")
 
 
 if __name__ == "__main__":
