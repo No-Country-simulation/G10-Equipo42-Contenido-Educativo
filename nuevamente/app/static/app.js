@@ -469,7 +469,31 @@ function showResult(data) {
   const contenido = resultado.contenido_adaptado || {};
   const renderer = RENDERERS[formato];
   resultContent.innerHTML = renderer ? renderer(contenido) : renderResultPlaceholder(resultado);
+  if (formato === 'Flashcards') {
+    adjustFlashcardTypography(resultContent);
+  }
   resultPanel.classList.add('visible');
+}
+
+/**
+ * Ajuste reactivo post-render: si algún dorso desborda el alto estándar,
+ * incrementa la densidad tipográfica de forma automática.
+ * @param {HTMLElement} container
+ */
+function adjustFlashcardTypography(container) {
+  requestAnimationFrame(() => {
+    const backs = container.querySelectorAll('.flashcard-back');
+    backs.forEach((back) => {
+      if (back.scrollHeight > back.clientHeight + 2) {
+        if (!back.classList.contains('text-compact') && !back.classList.contains('text-dense')) {
+          back.classList.add('text-compact');
+        } else if (back.classList.contains('text-compact')) {
+          back.classList.remove('text-compact');
+          back.classList.add('text-dense');
+        }
+      }
+    });
+  });
 }
 
 // ---------------------------------------------------------------------------
@@ -499,6 +523,18 @@ function renderFlashcards(contenido) {
 
   html += '<div class="flashcards-grid">';
   items.forEach((item, idx) => {
+    const dorsoText = item.dorso || '';
+    const pistaText = item.pista_didactica || '';
+    const totalChars = dorsoText.length + pistaText.length;
+
+    // Adaptación preventiva de densidad tipográfica según longitud
+    let densityClass = '';
+    if (totalChars > 300) {
+      densityClass = ' text-dense';
+    } else if (totalChars > 180) {
+      densityClass = ' text-compact';
+    }
+
     html += `
       <div
         class="flashcard"
@@ -510,7 +546,7 @@ function renderFlashcards(contenido) {
           <div class="flashcard-front">
             <p>${escapeHtml(item.frente)}</p>
           </div>
-          <div class="flashcard-back">
+          <div class="flashcard-back${densityClass}">
             <p>${escapeHtml(item.dorso)}</p>
             ${item.pista_didactica ? `<p class="flashcard-pista">💡 ${escapeHtml(item.pista_didactica)}</p>` : ''}
           </div>
