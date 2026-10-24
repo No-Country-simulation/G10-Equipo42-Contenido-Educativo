@@ -11,8 +11,9 @@ __pycache__/
 dist/
 build/
 
-# FAISS indexes (generados por el pipeline)
+# FAISS indexes y datos en runtime
 data/faiss_indexes/
+data/*.json
 
 # Sistema operativo
 .DS_Store

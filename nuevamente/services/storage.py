@@ -146,6 +146,15 @@ class StorageService:
         object_name = f"paquetes/{document_id}_{perfil}_{formato}_{timestamp}.json"
         data = json.dumps(package_dict, ensure_ascii=False).encode("utf-8")
 
+        # Guardar título generado por IA en metadata cache para listados rápidos
+        titulo = (
+            (package_dict.get("contenido_adaptado") or {}).get("titulo")
+            or package_dict.get("titulo")
+            or ""
+        )
+        if titulo:
+            self._save_metadata_cache(object_name, str(titulo))
+
         try:
             assert self._client is not None  # siempre True cuando _enabled es True
             self._client.upload_object(object_name=object_name, data=data)
@@ -171,6 +180,30 @@ class StorageService:
     # API publica — listado
     # ---------------------------------------------------------------------------
 
+    def _load_metadata_cache(self) -> dict[str, str]:
+        """Carga el diccionario de títulos y metadatos cacheados localmente."""
+        cache_file = Path("data/history_metadata.json")
+        if cache_file.exists():
+            try:
+                return json.loads(cache_file.read_text(encoding="utf-8"))
+            except Exception:
+                return {}
+        return {}
+
+    def _save_metadata_cache(self, objeto_id: str, titulo: str) -> None:
+        """Guarda un título asociado a un paquete en el archivo de caché local."""
+        try:
+            cache_file = Path("data/history_metadata.json")
+            cache_file.parent.mkdir(parents=True, exist_ok=True)
+            data = self._load_metadata_cache()
+            data[objeto_id] = titulo
+            cache_file.write_text(
+                json.dumps(data, ensure_ascii=False, indent=2),
+                encoding="utf-8",
+            )
+        except Exception as exc:
+            logger.debug("No se pudo escribir en history_metadata.json: %s", exc)
+
     def list_paquetes(self) -> list[dict]:
         """Lista los paquetes educativos almacenados en OCI Object Storage.
 
@@ -182,7 +215,7 @@ class StorageService:
 
         Returns:
             Lista de dicts con claves: objeto_id, perfil, formato,
-            fecha_epoch (int), fecha_iso (str ISO 8601 UTC).
+            fecha_epoch (int), fecha_iso (str ISO 8601 UTC), titulo (str).
             Lista vacia si OCI esta deshabilitado o si ocurre un error.
         """
         if not self._enabled:
@@ -198,6 +231,7 @@ class StorageService:
             )
             return []
 
+        cached_titles = self._load_metadata_cache()
         generaciones: list[dict] = []
         for object_name in object_names:
             try:
@@ -216,6 +250,7 @@ class StorageService:
                 fecha_iso = datetime.datetime.fromtimestamp(
                     fecha_epoch, tz=datetime.timezone.utc
                 ).isoformat()
+                titulo = cached_titles.get(object_name)
                 generaciones.append(
                     {
                         "objeto_id": object_name,
@@ -224,6 +259,7 @@ class StorageService:
                         "formato": formato,
                         "fecha_epoch": fecha_epoch,
                         "fecha_iso": fecha_iso,
+                        "titulo": titulo or f"{formato} — {perfil}",
                     }
                 )
             except Exception as exc:
@@ -263,6 +299,14 @@ class StorageService:
                 "Paquete educativo descargado desde OCI: objeto=%s",
                 objeto_id,
             )
+            # Guardar título en caché si existe para futuras listas
+            titulo = (
+                (paquete.get("contenido_adaptado") or {}).get("titulo")
+                or paquete.get("titulo")
+                or ""
+            )
+            if titulo:
+                self._save_metadata_cache(objeto_id, str(titulo))
             return paquete
         except Exception as exc:
             logger.error(
