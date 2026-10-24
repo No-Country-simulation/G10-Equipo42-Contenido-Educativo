@@ -2,7 +2,7 @@
 title: 'Collapsible Sidebar Rail, Layout Clean-up, Mobile Drawer & AI-Titled History'
 type: 'feature'
 created: '2026-10-24'
-status: 'ready-for-dev'
+status: 'completed'
 baseline_commit: 'f949231b3b80e0b5d9b32a10dcab46c7fda99881'
 route: 'dispatch'
 review_loop_iteration: 0
@@ -138,10 +138,10 @@ context:
 ## Tasks & Acceptance
 
 **Execution:**
-- [ ] `nuevamente/app/static/index.html` -- Remover header superior, agregar backdrop/botón móvil y actualizar estructura del sidebar (riel colapsable, botones de acción, botón Nuevo y buscador).
-- [ ] `nuevamente/app/static/style.css` -- Crear estilos para riel, hover swap del cerebro a `◨`, botón Nuevo, buscador, tarjetas con título de IA, transiciones y drawer off-canvas móvil (eliminando la franja horizontal fija).
-- [ ] `nuevamente/app/static/app.js` -- Implementar lógica de toggle (desktop + drawer móvil), botón Nuevo, buscador en vivo, ocultamiento de formulario al generar y renderizado de títulos de IA.
-- [ ] `nuevamente/services/storage.py` y `nuevamente/app/routers/adaptar.py` -- Asegurar que `/api/v1/historial` proporcione el campo `titulo` de cada paquete de forma resiliente.
+- [x] `nuevamente/app/static/index.html` -- Remover header superior, agregar backdrop/botón móvil y actualizar estructura del sidebar (riel colapsable, botones de acción, botón Nuevo y buscador).
+- [x] `nuevamente/app/static/style.css` -- Crear estilos para riel, hover swap del cerebro a `◨`, botón Nuevo, buscador, tarjetas con título de IA, transiciones y drawer off-canvas móvil (eliminando la franja horizontal fija).
+- [x] `nuevamente/app/static/app.js` -- Implementar lógica de toggle (desktop + drawer móvil), botón Nuevo, buscador en vivo, ocultamiento de formulario al generar y renderizado de títulos de IA.
+- [x] `nuevamente/services/storage.py` y `nuevamente/app/routers/adaptar.py` -- Asegurar que `/api/v1/historial` proporcione el campo `titulo` de cada paquete de forma resiliente.
 
 **Verification:**
 1. Cargar el sitio en navegador desktop: la barra debe iniciar expandida mostrando el logo `🧠 NuevaMente`. No debe existir la barra superior horizontal anterior.

@@ -37,6 +37,7 @@ const appState = {
   pollInterval: null,
   currentTaskId: null,
   submitAttempted: false, // true tras el primer intento de generar; habilita feedback de error en selects
+  historialItems: [],     // coleccion en memoria para busqueda client-side
 };
 
 // ---------------------------------------------------------------------------
@@ -49,6 +50,11 @@ let selectPerfil, selectFormato, selectNicho, inputNichoCustom;
 let btnGenerate, progressPanel, progressMessage;
 let errorPanel, errorMessage, btnRetry;
 let resultPanel, resultFormatoBadge, resultScoreDisplay, resultScoreValue, resultContent;
+let sidebar, sidebarBackdrop, sidebarRail, sidebarExpandedContent;
+let btnRailToggle, btnRailNew, btnRailSearch;
+let btnSidebarCollapse, btnSidebarSearch, btnSidebarNew;
+let sidebarSearchBox, inputSearchHistorial, btnClearSearch;
+let btnMobileSidebarToggle, btnMobileNew, inputPanel;
 let sidebarList, histCount;
 
 // ---------------------------------------------------------------------------
@@ -82,14 +88,33 @@ document.addEventListener('DOMContentLoaded', () => {
   sidebarList = document.getElementById('sidebar-list');
   histCount   = document.getElementById('hist-count');
 
+  // Referencias para la barra lateral interactiva y móvil
+  sidebar                = document.getElementById('sidebar');
+  sidebarBackdrop        = document.getElementById('sidebar-backdrop');
+  sidebarRail            = document.getElementById('sidebar-rail');
+  sidebarExpandedContent = document.getElementById('sidebar-expanded-content');
+  btnRailToggle          = document.getElementById('btn-rail-toggle');
+  btnRailNew             = document.getElementById('btn-rail-new');
+  btnRailSearch          = document.getElementById('btn-rail-search');
+  btnSidebarCollapse     = document.getElementById('btn-sidebar-collapse');
+  btnSidebarSearch       = document.getElementById('btn-sidebar-search');
+  btnSidebarNew          = document.getElementById('btn-sidebar-new');
+  sidebarSearchBox       = document.getElementById('sidebar-search-box');
+  inputSearchHistorial   = document.getElementById('input-search-historial');
+  btnClearSearch         = document.getElementById('btn-clear-search');
+  btnMobileSidebarToggle = document.getElementById('btn-mobile-sidebar-toggle');
+  btnMobileNew           = document.getElementById('btn-mobile-new');
+  inputPanel             = document.getElementById('input-panel');
+
   // Registrar listeners
   initUploadZone();
   initParamListeners();
   initGenerateButton();
   initQuizInteractivity();
   initHistorialInteractivity();
+  initSidebarInteractivity();
 
-  // Cargar historial al iniciar
+  // Cargar historial al iniciar (siempre inicia expandido en desktop)
   loadHistorial();
 });
 
@@ -292,6 +317,7 @@ async function handleGenerate() {
   formData.append('nicho_sector', getNichoValue());
 
   appState.submitAttempted = true; // habilita feedback de error en selects desde este momento
+  if (inputPanel) inputPanel.classList.add('hidden-panel');
   showProgress('Enviando documento al servidor...');
   hideResult();
   hideErrorPanel();
@@ -315,6 +341,7 @@ async function handleGenerate() {
   } catch (err) {
     showErrorPanel(`No se pudo enviar el documento: ${err.message}`);
     hideProgress();
+    if (inputPanel) inputPanel.classList.remove('hidden-panel');
     btnGenerate.disabled = false;
   }
 }
@@ -835,21 +862,159 @@ function initQuizInteractivity() {
 
 
 /**
- * Resetea la interfaz al estado inicial para un nuevo intento.
+ * Maneja la acción "Nuevo": limpia el material de estudio abierto y restaura el formulario inicial.
  */
-function resetToInputForm() {
+function handleNew() {
   stopPolling();
   hideErrorPanel();
   hideProgress();
   hideResult();
+  closeMobileSidebar();
+
+  // Mostrar el formulario de configuración
+  if (inputPanel) {
+    inputPanel.classList.remove('hidden-panel');
+  }
+
+  // Quitar selección activa en el historial
+  document.querySelectorAll('.hist-item.active').forEach((el) => el.classList.remove('active'));
+
+  // Resetear estados y formulario
   appState.currentTaskId = null;
   appState.submitAttempted = false;
-  // Quitar clases error de todos los selects
-  selectPerfil.classList.remove('error');
-  selectFormato.classList.remove('error');
-  selectNicho.classList.remove('error');
-  inputNichoCustom.classList.remove('error');
-  btnGenerate.disabled = !isFormReady();
+  clearFile();
+  if (selectPerfil) selectPerfil.classList.remove('error');
+  if (selectFormato) selectFormato.classList.remove('error');
+  if (selectNicho) selectNicho.classList.remove('error');
+  if (inputNichoCustom) inputNichoCustom.classList.remove('error');
+  if (btnGenerate) btnGenerate.disabled = !isFormReady();
+
+  // Scroll suave al inicio del área principal
+  const mainContent = document.getElementById('main-content');
+  if (mainContent) mainContent.scrollTop = 0;
+}
+
+/**
+ * Resetea la interfaz al estado inicial para un nuevo intento (reutiliza handleNew).
+ */
+function resetToInputForm() {
+  handleNew();
+}
+
+// ---------------------------------------------------------------------------
+// Barra lateral — Riel, Drawer móvil y Buscador
+// ---------------------------------------------------------------------------
+
+function collapseSidebar() {
+  if (window.innerWidth <= 768) {
+    closeMobileSidebar();
+    return;
+  }
+  if (sidebar) sidebar.classList.add('collapsed');
+}
+
+function expandSidebar() {
+  if (sidebar) sidebar.classList.remove('collapsed');
+}
+
+function openMobileSidebar() {
+  if (sidebar) sidebar.classList.add('mobile-open');
+  if (sidebarBackdrop) sidebarBackdrop.classList.add('active');
+}
+
+function closeMobileSidebar() {
+  if (sidebar) sidebar.classList.remove('mobile-open');
+  if (sidebarBackdrop) sidebarBackdrop.classList.remove('active');
+}
+
+function toggleSearchBox(forceOpen = null) {
+  if (!sidebarSearchBox) return;
+  const isCurrentlyOpen = sidebarSearchBox.style.display !== 'none';
+  const shouldOpen = forceOpen !== null ? forceOpen : !isCurrentlyOpen;
+  sidebarSearchBox.style.display = shouldOpen ? 'flex' : 'none';
+  if (shouldOpen && inputSearchHistorial) {
+    inputSearchHistorial.focus();
+  }
+}
+
+function filterHistorial(query) {
+  const q = (query || '').trim().toLowerCase();
+  if (!q) {
+    renderHistorial(appState.historialItems);
+    return;
+  }
+  const filtered = appState.historialItems.filter((gen) => {
+    const title = (gen.titulo || '').toLowerCase();
+    const formato = (gen.formato || '').toLowerCase();
+    const perfil = (gen.perfil || '').toLowerCase();
+    return title.includes(q) || formato.includes(q) || perfil.includes(q);
+  });
+  renderHistorial(filtered, true);
+}
+
+function initSidebarInteractivity() {
+  // Toggle Desktop desde Riel
+  if (btnRailToggle) {
+    btnRailToggle.addEventListener('click', expandSidebar);
+  }
+
+  // Colapsar desde header del sidebar
+  if (btnSidebarCollapse) {
+    btnSidebarCollapse.addEventListener('click', collapseSidebar);
+  }
+
+  // Botón "Nuevo" (desde riel, sidebar expandido o barra móvil)
+  if (btnRailNew) btnRailNew.addEventListener('click', handleNew);
+  if (btnSidebarNew) btnSidebarNew.addEventListener('click', handleNew);
+  if (btnMobileNew) btnMobileNew.addEventListener('click', handleNew);
+
+  // Botón de búsqueda desde el riel
+  if (btnRailSearch) {
+    btnRailSearch.addEventListener('click', () => {
+      expandSidebar();
+      toggleSearchBox(true);
+    });
+  }
+
+  // Botón de búsqueda desde cabecera del sidebar
+  if (btnSidebarSearch) {
+    btnSidebarSearch.addEventListener('click', () => {
+      toggleSearchBox();
+    });
+  }
+
+  // Input de búsqueda en vivo
+  if (inputSearchHistorial) {
+    inputSearchHistorial.addEventListener('input', (e) => {
+      filterHistorial(e.target.value);
+    });
+  }
+
+  // Limpiar búsqueda
+  if (btnClearSearch) {
+    btnClearSearch.addEventListener('click', () => {
+      if (inputSearchHistorial) {
+        inputSearchHistorial.value = '';
+        inputSearchHistorial.focus();
+      }
+      renderHistorial(appState.historialItems);
+    });
+  }
+
+  // Toggle Móvil (Drawer)
+  if (btnMobileSidebarToggle) {
+    btnMobileSidebarToggle.addEventListener('click', openMobileSidebar);
+  }
+  if (sidebarBackdrop) {
+    sidebarBackdrop.addEventListener('click', closeMobileSidebar);
+  }
+
+  // Cerrar drawer con tecla Escape
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && sidebar && sidebar.classList.contains('mobile-open')) {
+      closeMobileSidebar();
+    }
+  });
 }
 
 // ---------------------------------------------------------------------------
@@ -864,7 +1029,8 @@ async function loadHistorial() {
     const response = await fetch(`${API_BASE}/historial`);
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     const data = await response.json();
-    renderHistorial(data.generaciones || []);
+    appState.historialItems = data.generaciones || [];
+    renderHistorial(appState.historialItems);
   } catch (err) {
     sidebarList.innerHTML = `
       <div class="sidebar-empty">
@@ -876,11 +1042,23 @@ async function loadHistorial() {
 }
 
 /**
- * Renderiza la lista de generaciones en la sidebar.
- * @param {Array<{objeto_id: string, perfil: string, formato: string, fecha_iso: string}>} generaciones
+ * Renderiza la lista de generaciones en la sidebar con títulos de IA destacados.
+ * @param {Array<{objeto_id: string, perfil: string, formato: string, fecha_iso: string, titulo?: string}>} generaciones
+ * @param {boolean} isSearch - Indica si el renderizado es producto de un filtro de búsqueda
  */
-function renderHistorial(generaciones) {
+function renderHistorial(generaciones, isSearch = false) {
   if (generaciones.length === 0) {
+    if (isSearch) {
+      histCount.textContent = '0 resultados';
+      sidebarList.innerHTML = `
+        <div class="sidebar-empty">
+          <div class="sidebar-empty-icon" aria-hidden="true">🔍</div>
+          <div class="sidebar-empty-text">
+            No se encontraron adaptaciones coincidentes con la búsqueda.
+          </div>
+        </div>`;
+      return;
+    }
     histCount.textContent = 'Sin generaciones aún';
     sidebarList.innerHTML = `
       <div class="sidebar-empty">
@@ -896,16 +1074,20 @@ function renderHistorial(generaciones) {
 
   const items = generaciones.map((gen) => {
     const fecha = formatFecha(gen.fecha_iso);
+    const displayTitle = gen.titulo || gen.formato || 'Adaptación Pedagógica';
     return `
       <div
         class="hist-item"
         role="button"
         tabindex="0"
         data-objeto-id="${escapeAttr(gen.objeto_id)}"
-        aria-label="${escapeAttr(gen.formato)} - ${escapeAttr(gen.perfil)} - ${escapeAttr(fecha)}"
+        aria-label="${escapeAttr(displayTitle)} - ${escapeAttr(gen.formato)} - ${escapeAttr(gen.perfil)} - ${escapeAttr(fecha)}"
       >
-        <div class="hist-item-formato">${escapeHtml(gen.formato)}</div>
-        <div class="hist-item-perfil">${escapeHtml(gen.perfil)}</div>
+        <div class="hist-item-title">${escapeHtml(displayTitle)}</div>
+        <div class="hist-item-meta">
+          <span class="hist-badge-formato">${escapeHtml(gen.formato)}</span>
+          <span class="hist-badge-perfil">• ${escapeHtml(gen.perfil)}</span>
+        </div>
         <div class="hist-item-fecha">${escapeHtml(fecha)}</div>
       </div>`;
   });
@@ -924,6 +1106,11 @@ function initHistorialInteractivity() {
     if (!item) return;
     if (e.type === 'keydown' && e.key !== 'Enter' && e.key !== ' ') return;
     if (e.type === 'keydown') e.preventDefault();
+
+    // Marcar como activo
+    document.querySelectorAll('.hist-item.active').forEach((el) => el.classList.remove('active'));
+    item.classList.add('active');
+
     const objetoId = item.dataset.objetoId;
     if (objetoId) loadPaqueteFromHistorial(objetoId);
   }
@@ -939,6 +1126,8 @@ function initHistorialInteractivity() {
  */
 async function loadPaqueteFromHistorial(objetoId) {
   stopPolling();
+  closeMobileSidebar();
+  if (inputPanel) inputPanel.classList.add('hidden-panel');
   showProgress('Cargando paquete desde historial...');
   hideResult();
   hideErrorPanel();
