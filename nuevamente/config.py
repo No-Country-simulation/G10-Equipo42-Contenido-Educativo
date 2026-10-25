@@ -45,7 +45,8 @@ class Settings(BaseSettings):
     # --- FAISS ---
     faiss_index_dir: Path = Path("data/faiss_indexes")
 
-    # --- OCI Object Storage ---
+    # --- Almacenamiento (Local y OCI) ---
+    local_storage_dir: Path = Path("data/storage")
     oci_bucket_name: str = ""
     oci_namespace: str = ""
     oci_compartment_id: str = ""

@@ -2,7 +2,7 @@
 title: 'Hybrid Local-First Storage & OCI Sync'
 type: 'feature'
 created: '2026-10-25'
-status: 'ready-for-dev'
+status: 'completed'
 baseline_commit: '92b30f922122914f6c56b5205e75c2ecb081b509'
 route: 'dispatch'
 review_loop_iteration: 0
@@ -126,11 +126,11 @@ context:
 ## Tasks & Acceptance
 
 **Execution:**
-- [ ] `.gitignore` -- Agregar `data/storage/` a los patrones ignorados.
-- [ ] `nuevamente/config.py` -- Agregar configuración de `local_storage_dir`.
-- [ ] `nuevamente/services/storage.py` -- Implementar persistencia local, unión desduplicada en `list_paquetes`, lectura local-first en `get_paquete` y sincronización en background `sync_pending_to_oci`.
-- [ ] `nuevamente/app/main.py` -- Añadir trigger de sincronización en background en el startup del servidor.
-- [ ] `tests/test_storage.py` -- Agregar pruebas unitarias automatizadas con pytest para el comportamiento local-only, híbrido y sincronización.
+- [x] `.gitignore` -- Agregar `data/storage/` a los patrones ignorados.
+- [x] `nuevamente/config.py` -- Agregar configuración de `local_storage_dir`.
+- [x] `nuevamente/services/storage.py` -- Implementar persistencia local, unión desduplicada en `list_paquetes`, lectura local-first en `get_paquete` y sincronización en background `sync_pending_to_oci`.
+- [x] `nuevamente/app/main.py` -- Añadir trigger de sincronización en background en el startup del servidor.
+- [x] `tests/test_storage.py` -- Agregar pruebas unitarias automatizadas con pytest para el comportamiento local-only, híbrido y sincronización.
 
 **Verification:**
 1. Con OCI deshabilitado (`.env` sin credenciales OCI o bucket vacío):

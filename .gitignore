@@ -14,6 +14,7 @@ build/
 # FAISS indexes y datos en runtime
 data/faiss_indexes/
 data/*.json
+data/storage/
 
 # Sistema operativo
 .DS_Store

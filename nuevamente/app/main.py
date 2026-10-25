@@ -8,6 +8,7 @@ Punto de entrada de la API REST. Configura la aplicacion con:
 
 from __future__ import annotations
 
+import asyncio
 import logging
 from contextlib import asynccontextmanager
 from pathlib import Path
@@ -19,6 +20,7 @@ from fastapi.staticfiles import StaticFiles
 from nuevamente.app.routers import adaptar_router
 from nuevamente.core.exceptions import NuevaMenteError
 from nuevamente.pipeline.graph import build_graph
+from nuevamente.services.storage import storage_service
 
 logger = logging.getLogger(__name__)
 
@@ -34,6 +36,12 @@ async def lifespan(app: FastAPI):
     logger.info("Arranque de NuevaMente: compilando grafo LangGraph...")
     app.state.graph = build_graph()
     logger.info("Grafo LangGraph compilado y listo.")
+
+    # Si OCI está habilitado, sincronizar archivos locales pendientes en segundo plano
+    if storage_service._enabled:
+        logger.info("OCI activo: iniciando sincronización de archivos pendientes en background...")
+        asyncio.create_task(storage_service.sync_pending_to_oci_async())
+
     yield
     logger.info("Apagado de NuevaMente.")
 
