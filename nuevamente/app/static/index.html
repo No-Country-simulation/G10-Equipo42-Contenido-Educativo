@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NuevaMente — Adaptación de Documentos Técnicos</title>
+  <meta name="description" content="Transforma documentación técnica en paquetes educativos personalizados con inteligencia artificial. Selecciona perfil, formato pedagógico y sector.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <div class="app-layout" id="app-layout">
+    <!-- Backdrop oscuro para drawer móvil -->
+    <div class="sidebar-backdrop" id="sidebar-backdrop" aria-hidden="true"></div>
+
+    <!-- ===================== SIDEBAR ===================== -->
+    <aside class="sidebar" id="sidebar" aria-label="Navegación e Historial">
+
+      <!-- Riel colapsado (Desktop: 3 botones verticales) -->
+      <div class="sidebar-rail" id="sidebar-rail" aria-label="Acciones rápidas">
+        <!-- Botón superior: Cerebro que muta a toggle al hover -->
+        <button class="rail-btn rail-btn-toggle" id="btn-rail-toggle" aria-label="Mostrar barra lateral" title="Mostrar barra lateral">
+          <span class="icon-brain" aria-hidden="true">🧠</span>
+          <span class="icon-toggle" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+              <line x1="9" y1="3" x2="9" y2="21"></line>
+            </svg>
+          </span>
+        </button>
+
+        <!-- Botón Nuevo -->
+        <button class="rail-btn rail-btn-new" id="btn-rail-new" aria-label="Nuevo" title="Nuevo">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 20h9"></path>
+            <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+          </svg>
+        </button>
+
+        <!-- Botón Buscar -->
+        <button class="rail-btn rail-btn-search" id="btn-rail-search" aria-label="Buscar" title="Buscar">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Contenido Expandido del Sidebar -->
+      <div class="sidebar-expanded-content" id="sidebar-expanded-content">
+        <div class="sidebar-header">
+          <div class="sidebar-brand">
+            <span class="sidebar-brand-icon" aria-hidden="true">🧠</span>
+            <span class="sidebar-brand-name">NuevaMente</span>
+          </div>
+          <div class="sidebar-header-actions">
+            <button class="sidebar-action-btn" id="btn-sidebar-search" aria-label="Buscar en historial" title="Buscar">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              </svg>
+            </button>
+            <button class="sidebar-action-btn" id="btn-sidebar-collapse" aria-label="Ocultar barra lateral" title="Ocultar barra lateral">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                <line x1="9" y1="3" x2="9" y2="21"></line>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Botón Nuevo -->
+        <div class="sidebar-new-container">
+          <button class="btn-sidebar-new" id="btn-sidebar-new" type="button" aria-label="Nuevo">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 20h9"></path>
+              <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+            </svg>
+            <span>Nuevo</span>
+          </button>
+        </div>
+
+        <!-- Buscador de Historial en vivo -->
+        <div class="sidebar-search-box" id="sidebar-search-box" style="display:none;">
+          <input
+            type="text"
+            id="input-search-historial"
+            class="input-search-historial"
+            placeholder="Buscar en historial..."
+            aria-label="Buscar en historial"
+          >
+          <button class="btn-clear-search" id="btn-clear-search" aria-label="Limpiar búsqueda" title="Limpiar búsqueda">✕</button>
+        </div>
+
+        <!-- Subencabezado Historial -->
+        <div class="sidebar-subhead">
+          <span class="sidebar-title">HISTORIAL</span>
+          <span class="sidebar-count" id="hist-count">Cargando...</span>
+        </div>
+
+        <!-- Lista scrolleable del historial -->
+        <nav class="sidebar-list" id="sidebar-list" aria-live="polite">
+          <div class="sidebar-loading">
+            <span class="spinner" style="width:14px;height:14px;border-width:2px;margin-right:0"></span>
+            Cargando historial...
+          </div>
+        </nav>
+      </div>
+    </aside>
+
+    <!-- ===================== ÁREA PRINCIPAL ===================== -->
+    <div class="main-area" id="main-area">
+
+      <!-- Barra superior compacta solo para móvil -->
+      <div class="mobile-top-bar" id="mobile-top-bar">
+        <button class="mobile-sidebar-toggle" id="btn-mobile-sidebar-toggle" aria-label="Abrir historial" title="Abrir historial">
+          <span aria-hidden="true">🧠</span>
+          <span class="mobile-toggle-label">NuevaMente</span>
+        </button>
+        <button class="mobile-btn-new" id="btn-mobile-new" aria-label="Nuevo" title="Nuevo">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 20h9"></path>
+            <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+          </svg>
+          <span>Nuevo</span>
+        </button>
+      </div>
+
+      <!-- Contenido scrollable -->
+      <main class="main-content" id="main-content">
+        <div class="input-panel" id="input-panel">
+
+          <!-- Títulos -->
+          <h1 class="section-title">Transformar Documento</h1>
+          <p class="section-subtitle">
+            Sube un documento técnico, configura los parámetros de adaptación y genera un paquete educativo personalizado.
+          </p>
+
+          <!-- ===== ZONA DE UPLOAD ===== -->
+          <div
+            class="upload-zone"
+            id="upload-zone"
+            role="button"
+            tabindex="0"
+            aria-label="Zona de carga de documento. Arrastra un archivo o haz clic para seleccionar."
+          >
+            <input
+              type="file"
+              id="file-input"
+              accept=".pdf,.md,.txt,text/plain,text/markdown,application/pdf"
+              aria-hidden="true"
+            >
+            <div class="upload-zone-content">
+              <span class="upload-icon" aria-hidden="true">📄</span>
+              <div class="upload-title">Arrastra tu documento aquí</div>
+              <div class="upload-subtitle">o haz clic para seleccionarlo</div>
+              <div class="upload-formats">
+                <span class="upload-format-badge">PDF</span>
+                <span class="upload-format-badge">.md</span>
+                <span class="upload-format-badge">.txt</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Info de archivo seleccionado (oculto inicialmente) -->
+          <div id="file-info" class="file-info" style="display:none; margin-top:-12px; margin-bottom:12px;">
+            <span class="file-info-icon" aria-hidden="true">✅</span>
+            <span class="file-info-name" id="file-info-name"></span>
+            <button class="file-info-clear" id="btn-clear-file" aria-label="Quitar archivo" title="Quitar archivo">✕</button>
+          </div>
+
+          <!-- Error de archivo (oculto inicialmente) -->
+          <div id="file-error" class="file-error" style="display:none; margin-top:-12px; margin-bottom:12px;" role="alert">
+            <span aria-hidden="true">⚠️</span>
+            <span id="file-error-text"></span>
+          </div>
+
+          <!-- ===== PARÁMETROS ===== -->
+          <div class="params-card">
+            <div class="params-title">Parámetros de Adaptación</div>
+
+            <!-- Perfil del Destinatario -->
+            <div class="param-group">
+              <label class="param-label" for="select-perfil">
+                Perfil del Destinatario <span class="required" aria-hidden="true">*</span>
+              </label>
+              <select
+                class="param-select"
+                id="select-perfil"
+                name="perfil_destinatario"
+                required
+                aria-required="true"
+              >
+                <option value="" disabled selected>Selecciona un perfil...</option>
+                <option value="Principiante">Principiante</option>
+                <option value="Junior">Junior</option>
+                <option value="Senior">Senior</option>
+                <option value="Lider Tecnico/Arquitecto">Líder Técnico / Arquitecto</option>
+              </select>
+            </div>
+
+            <!-- Formato Pedagógico -->
+            <div class="param-group">
+              <label class="param-label" for="select-formato">
+                Formato Pedagógico <span class="required" aria-hidden="true">*</span>
+              </label>
+              <select
+                class="param-select"
+                id="select-formato"
+                name="formato_salida"
+                required
+                aria-required="true"
+              >
+                <option value="" disabled selected>Selecciona un formato...</option>
+                <option value="Flashcards">Flashcards</option>
+                <option value="Quiz Interactivo">Quiz Interactivo</option>
+                <option value="Tutorial Paso a Paso">Tutorial Paso a Paso</option>
+                <option value="Resumen Ejecutivo">Resumen Ejecutivo</option>
+                <option value="Guion de Clase">Guión de Clase</option>
+              </select>
+            </div>
+
+            <!-- Nicho / Contexto -->
+            <div class="param-group">
+              <label class="param-label" for="select-nicho">
+                Nicho / Contexto <span class="required" aria-hidden="true">*</span>
+              </label>
+              <div class="nicho-wrapper">
+                <select
+                  class="param-select"
+                  id="select-nicho"
+                  name="nicho_predefinido"
+                  aria-label="Selecciona un nicho predefinido o escribe uno personalizado abajo"
+                >
+                  <option value="">Selecciona un nicho predefinido...</option>
+                  <option value="General">General</option>
+                  <option value="Fintech">Fintech</option>
+                  <option value="Salud">Salud</option>
+                  <option value="E-commerce">E-commerce</option>
+                  <option value="__custom__">✏️ Nicho personalizado...</option>
+                </select>
+                <input
+                  type="text"
+                  class="param-input"
+                  id="input-nicho-custom"
+                  name="nicho_custom"
+                  placeholder="Escribe tu nicho personalizado (ej: veterinarios aprendiendo a programar)"
+                  style="display:none;"
+                  aria-label="Nicho personalizado"
+                  maxlength="200"
+                >
+              </div>
+            </div>
+          </div>
+
+          <!-- ===== BOTÓN GENERAR ===== -->
+          <button
+            class="btn-generate"
+            id="btn-generate"
+            type="button"
+            disabled
+            aria-disabled="true"
+          >
+            Generar Paquete Educativo
+          </button>
+        </div><!-- /input-panel -->
+
+        <!-- ===== PANEL DE PROGRESO ===== -->
+        <div class="progress-panel" id="progress-panel" role="status" aria-live="polite">
+          <div class="progress-title">
+            <span class="spinner"></span>
+            Generando tu paquete educativo...
+          </div>
+          <div class="progress-message" id="progress-message">
+            Procesando documento e iniciando pipeline...
+          </div>
+          <div class="progress-bar-track">
+            <div class="progress-bar-fill"></div>
+          </div>
+        </div>
+
+        <!-- ===== PANEL DE ERROR ===== -->
+        <div class="error-panel" id="error-panel" role="alert">
+          <div class="error-panel-title">❌ Error en la generación</div>
+          <div class="error-panel-message" id="error-message">
+            Ocurrió un error durante el procesamiento.
+          </div>
+          <button class="btn-retry" id="btn-retry" type="button">
+            Reintentar
+          </button>
+        </div>
+
+        <!-- ===== PANEL DE RESULTADO ===== -->
+        <div class="result-panel" id="result-panel">
+          <div class="result-header">
+            <span class="result-badge" id="result-formato-badge">Resultado</span>
+            <span class="result-score" id="result-score-display" style="display:none;">
+              Fidelidad: <span class="result-score-value" id="result-score-value">—</span>
+            </span>
+          </div>
+          <!-- El contenido del resultado lo inyectará app.js / Story 3.2 -->
+          <div id="result-content">
+            <div class="result-placeholder">
+              El resultado se mostrará aquí una vez completada la generación.
+            </div>
+          </div>
+        </div>
+
+      </main><!-- /main-content -->
+    </div><!-- /main-area -->
+  </div><!-- /app-layout -->
+
+  <script src="/static/app.js" defer></script>
+</body>
+</html>

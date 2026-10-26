@@ -1,0 +1,71 @@
+{
+  "status": "completed",
+  "metadatos": {
+    "perfil_aplicado": "Principiante sin experiencia previa",
+    "formato_generado": "Flashcards",
+    "tiempo_estimado_estudio_minutos": 15,
+    "conceptos_clave": [
+      "Clases",
+      "Objetos",
+      "Espacios de nombres",
+      "Ámbitos",
+      "Herencia",
+      "Iteradores",
+      "Generadores"
+    ],
+    "prerrequisitos": [
+      "Conceptos básicos de programación en Python como funciones y variables"
+    ]
+  },
+  "evaluacion_calidad": {
+    "anclaje_fuente_score": 1.0,
+    "claridad_pedagogica": "Excelente estructura y claridad. Las tarjetas de estudio presentan definiciones precisas basadas directamente en la documentación oficial de Python, complementadas con analogías didácticas muy acertadas que facilitan la comprensión de conceptos abstractos como espacios de nombres, ámbitos, iteradores y generadores.",
+    "observaciones": "El contenido generado está completamente anclado y respaldado por los fragmentos proporcionados de la documentación oficial de Python (Sección 9: Classes, Namespaces, Scopes, Inheritance, Iterators y Generators). No se han encontrado extrapolaciones ni información inventada."
+  },
+  "contenido_adaptado": {
+    "titulo": "Tarjetas de Estudio: Clases, Objetos y Estructuras Avanzadas en Python",
+    "introduccion_contextualizada": "Bienvenido a este recorrido por la programación orientada a objetos en Python. Imagina que una clase es como el plano arquitectónico de una casa y los objetos son las casas construidas a partir de ese plano. A lo largo de estas tarjetas aprenderás de forma sencilla cómo organizar tu código, crear tus propias estructuras de datos y recorrer listas o secuencias eficientemente.",
+    "items": [
+      {
+        "frente": "¿Qué es una clase en Python?",
+        "dorso": "Es un medio para agrupar datos y funcionalidad juntos. Crea un nuevo tipo de objeto que permite fabricar nuevas instancias de ese tipo.",
+        "pista_didactica": "Piensa en una clase como un molde para hacer galletas y en las instancias como las galletas individuales."
+      },
+      {
+        "frente": "¿Qué es un espacio de nombres (namespace)?",
+        "dorso": "Es una correspondencia o mapa que relaciona nombres con objetos. Funciona como una guía telefónica donde cada nombre apunta a algo específico.",
+        "pista_didactica": "Permite que diferentes módulos usen el mismo nombre de función sin entrar en conflicto."
+      },
+      {
+        "frente": "¿Qué es un ámbito (scope)?",
+        "dorso": "Es una región del programa donde un espacio de nombres es directamente accesible sin necesidad de prefijos.",
+        "pista_didactica": "Imagina los ámbitos como capas de una cebolla; buscas primero en la capa más interna y vas subiendo si no lo encuentras."
+      },
+      {
+        "frente": "¿Para qué sirve el método especial __init__()?",
+        "dorso": "Es un método que se invoca automáticamente al crear una nueva instancia de la clase, y sirve para personalizar el estado inicial del objeto.",
+        "pista_didactica": "Piensa en ello como el constructor o la configuración inicial cuando abres un aparato nuevo."
+      },
+      {
+        "frente": "¿Cuál es la diferencia entre variables de clase y variables de instancia?",
+        "dorso": "Las variables de clase se comparten entre todas las instancias creadas, mientras que las variables de instancia son únicas y exclusivas para cada objeto particular.",
+        "pista_didactica": "Una variable de clase es como una regla de la escuela para todos los alumnos, y una variable de instancia es la mochila personal de cada alumno."
+      },
+      {
+        "frente": "¿Qué es la herencia en clases?",
+        "dorso": "Es un mecanismo que permite crear una clase derivada (subclase) a partir de una clase base, heredando sus atributos y métodos, y pudiendo modificarlos.",
+        "pista_didactica": "Es como un hijo que hereda los rasgos y habilidades de sus padres pero puede aprender cosas nuevas."
+      },
+      {
+        "frente": "¿Qué es un iterador?",
+        "dorso": "Es un objeto que permite recorrer un contenedor paso a paso utilizando el método especial __next__() para acceder a los elementos uno por uno.",
+        "pista_didactica": "Es como leer un libro pasando las páginas de una en una hasta llegar al final."
+      },
+      {
+        "frente": "¿Qué es un generador?",
+        "dorso": "Es una herramienta simple y potente para crear iteradores usando funciones normales que emplean la sentencia 'yield' para devolver datos poco a poco.",
+        "pista_didactica": "A diferencia de una lista gigante que ocupa toda la memoria, el generador te da el siguiente valor solo cuando se lo pides."
+      }
+    ]
+  }
+}
