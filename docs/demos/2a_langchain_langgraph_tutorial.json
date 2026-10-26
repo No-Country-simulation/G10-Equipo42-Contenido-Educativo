@@ -1,0 +1,55 @@
+{
+  "status": "completed",
+  "metadatos": {
+    "perfil_aplicado": "Senior",
+    "formato_generado": "Tutorial Paso a Paso",
+    "tiempo_estimado_estudio_minutos": 45,
+    "conceptos_clave": [
+      "Agent Frameworks",
+      "Agent Runtimes",
+      "Agent Harnesses",
+      "Durable Execution",
+      "Human-in-the-loop",
+      "Subagents"
+    ],
+    "prerrequisitos": [
+      "Experiencia previa en desarrollo con LLMs",
+      "Comprensión de arquitecturas basadas en agentes y bucles de ejecución"
+    ]
+  },
+  "evaluacion_calidad": {
+    "anclaje_fuente_score": 1.0,
+    "claridad_pedagogica": "El contenido posee una estructura excelente, muy adecuada para ingenieros y arquitectos senior. Explica con claridad las diferencias entre capas de abstracción (frameworks, runtimes, harnesses), utilizando ejemplos precisos y tablas de características directamente extraídas de la documentación oficial proporcionada.",
+    "observaciones": "El contenido generado está perfectamente anclado al documento fuente. Cada concepto, lista de herramientas, ejemplos de frameworks (LangChain, CrewAI, etc.), runtimes (LangGraph, Temporal) y harnesses (Deep Agents SDK, Claude Agent SDK) corresponde exactamente con la información provista en los fragmentos originales."
+  },
+  "contenido_adaptado": {
+    "titulo": "Arquitectura de Agentes: Diferenciando Runtimes, Frameworks y Harnesses",
+    "introduccion_contextualizada": "Para ingenieros y arquitectos senior que diseñan sistemas basados en inteligencia artificial, seleccionar la capa adecuada en el ecosistema de desarrollo de agentes es crítico. Este tutorial examina las distinciones fundamentales entre frameworks de agentes (como LangChain), runtimes de agentes (como LangGraph) y agent harnesses (como Deep Agents SDK), permitiéndole alinear la infraestructura correcta con sus necesidades de producción, control a bajo nivel y autonomía de tareas.",
+    "items": [
+      {
+        "paso": 1,
+        "titulo": "Comprender la Capa de Abstracción con Agent Frameworks",
+        "explicacion": "Los agent frameworks proporcionan abstracciones orientadas a desarrolladores para iniciar rápidamente la construcción de aplicaciones basadas en LLMs. Ofrecen bloques de contenido estructurado, el bucle de agentes (agent loop) y middleware. Ejemplos de este nivel incluyen LangChain, Vercel's AI SDK, CrewAI, OpenAI Agents SDK, Google ADK y LlamaIndex. Utilice un framework cuando necesite estandarizar la forma en que un equipo construye aplicaciones sencillas sin requerir una orquestación compleja inicial.",
+        "ejemplo": "Implementar rápidamente una aplicación básica utilizando LangChain para estandarizar modelos, herramientas y bucles de agentes sin necesidad de configurar directamente una infraestructura de grafos compleja."
+      },
+      {
+        "paso": 2,
+        "titulo": "Orquestación y Control de Producción con Agent Runtimes",
+        "explicacion": "Los agent runtimes proporcionan las herramientas necesarias para ejecutar agentes en producción, ofreciendo control de bajo nivel sobre la orquestación. Proveen capacidades críticas como ejecución duradera (durable execution para tolerar fallos y reanudar estados), streaming, flujos de trabajo con intervención humana (Human-in-the-loop) y persistencia a nivel de hilo. LangGraph es un ejemplo nativo de bajo nivel sobre el cual se construyen frameworks superiores (como LangChain 1.0), junto con motores de ejecución como Temporal o Inngest.",
+        "ejemplo": "Diseñar un flujo de trabajo estatal de larga duración utilizando LangGraph para incorporar puntos de interrupción (interrupts) que permitan inspeccionar y modificar el estado del agente antes de continuar."
+      },
+      {
+        "paso": 3,
+        "titulo": "Maximización de Autonomía con Agent Harnesses",
+        "explicacion": "Los agent harnesses son frameworks de tipo 'baterías incluidas' (opinionated) diseñados para tareas complejas y no deterministas. Incorporan herramientas y capacidades predefinidas como listas de tareas para planificación, delegación mediante subagentes para mantener el contexto limpio, sistemas de ficheros con backends conectables, y gestión avanzada de tokens (como resumen de historiales y desalojo de resultados grandes). Ejemplos notables son Deep Agents SDK, Claude Agent SDK y Manus.",
+        "ejemplo": "Utilizar el Deep Agents SDK para desplegar un agente que maneje múltiples subtareas autónomas utilizando un sistema de ficheros integrado y subagentes especializados para descomponer problemas complejos."
+      },
+      {
+        "paso": 4,
+        "titulo": "Evaluación de Matriz de Características y Decisiones de Arquitectura",
+        "explicacion": "Al diseñar sistemas avanzados, debe evaluar cómo se integran las memorias a corto y largo plazo, las habilidades, los subagentes, la intervención humana (HITL) y el streaming en cada tecnología. LangGraph ofrece primitivas como subgráficos e interrupciones; LangChain proporciona middleware y habilidades multi-agente; y Deep Agents ofrece implementaciones robustas como `StateBackend` y parámetros específicos para gestión de tareas complejas.",
+        "ejemplo": "Seleccionar LangGraph si requiere control granular de corto/largo plazo mediante grafos y subgráficos, o optar por Deep Agents si su prioridad es la gestión autónoma del almacenamiento y la ejecución de tareas multiplataforma mediante un SDK integrado."
+      }
+    ]
+  }
+}

@@ -1,0 +1,75 @@
+{
+  "status": "completed",
+  "metadatos": {
+    "perfil_aplicado": "Senior",
+    "formato_generado": "Quiz Interactivo",
+    "tiempo_estimado_estudio_minutos": 10,
+    "conceptos_clave": [
+      "Agent Frameworks",
+      "Agent Runtimes",
+      "Agent Harnesses",
+      "Durable Execution",
+      "Human-in-the-loop",
+      "State Management"
+    ],
+    "prerrequisitos": [
+      "Arquitectura de agentes basados en LLM",
+      "Conceptos de orquestacion y flujos con estado"
+    ]
+  },
+  "evaluacion_calidad": {
+    "anclaje_fuente_score": 1.0,
+    "claridad_pedagogica": "Excelente estructura pedagógica. Las preguntas del quiz evalúan con precisión los conceptos clave presentados en el texto fuente (diferencias entre runtimes, frameworks y harnesses), y tanto las opciones como las justificaciones están directamente respaldadas por la documentación oficial proporcionada sin añadir información externa.",
+    "observaciones": "El contenido generado está completamente alineado y respaldado por el documento fuente. No se detectaron desviaciones ni afirmaciones sin sustento."
+  },
+  "contenido_adaptado": {
+    "titulo": "Arquitectura de Agentes: Runtimes, Frameworks y Harnesses",
+    "introduccion_contextualizada": "Como arquitecto de sistemas y desarrollador senior, comprender la separación de incumbencias entre frameworks de agentes, runtimes de ejecución y harnesses es crítico para diseñar sistemas tolerantes a fallos y escalables. Este quiz evalúa los criterios de selección y los valores agregados de capas como LangChain, LangGraph y Deep Agents SDK en flujos de trabajo complejos y no deterministas.",
+    "items": [
+      {
+        "pregunta": "¿Cuál es el principal valor agregado de un agent runtime como LangGraph en comparación con un framework de alto nivel?",
+        "opciones": [
+          "Proveer abstracciones rápidas para modelos y bucles de agentes estándar.",
+          "Ofrecer ejecución durable, persistencia, streaming y control de bajo nivel para flujos stateful de larga duración.",
+          "Incluir herramientas predefinidas como sistemas de archivos y gestión de prompts.",
+          "Estandarizar únicamente la interfaz de llamadas a APIs de LLMs externos."
+        ],
+        "respuesta_correcta": "Ofrecer ejecución durable, persistencia, streaming y control de bajo nivel para flujos stateful de larga duración.",
+        "justificacion": "Según el documento fuente, los runtimes de agentes como LangGraph proporcionan tooling para producción enfocado en ejecución durable, streaming, HITL (human-in-the-loop), persistencia y control de bajo nivel sobre la orquestación."
+      },
+      {
+        "pregunta": "En el contexto de la pila de desarrollo de agentes, ¿qué caracteriza a un agent harness como el Deep Agents SDK?",
+        "opciones": [
+          "Ser una librería minimalista sin dependencias para llamadas directas a inferencia.",
+          "Ser un motor de ejecución enfocado estrictamente en transacciones distribuidas de baja latencia.",
+          "Ser un framework opinionado y con herramientas integradas (batteries-included) como planificación, subagentes y sistemas de archivos para tareas complejas y autónomas.",
+          "Reemplazar por completo la necesidad de utilizar un runtime subyacente de grafos."
+        ],
+        "respuesta_correcta": "Ser un framework opinionado y con herramientas integradas (batteries-included) como planificación, subagentes y sistemas de archivos para tareas complejas y autónomas.",
+        "justificacion": "El documento fuente define a los agent harnesses como marcos de trabajo opinionados, 'batteries-included', con capacidades integradas como gestión de tareas mediante listas de pendientes, delegación de trabajo con subagentes y acceso a sistemas de archivos."
+      },
+      {
+        "pregunta": "¿Cuándo se recomienda utilizar un agent framework como LangChain en lugar de implementar directamente sobre un runtime?",
+        "opciones": [
+          "Cuando se requiere ejecución estrictamente durable a lo largo de semanas con recuperación ante fallos de infraestructura.",
+          "Cuando se busca acelerar el desarrollo inicial utilizando abstracciones estándar para modelos, herramientas y bucles de agentes sin requerir orquestación compleja inmediata.",
+          "Cuando se necesita control de bajo nivel extremo sobre cada transición de estado en un grafo cíclico.",
+          "Cuando el agente debe operar de manera completamente autónoma frente a tareas no deterministas complejas con múltiples subagentes."
+        ],
+        "respuesta_correcta": "Cuando se busca acelerar el desarrollo inicial utilizando abstracciones estándar para modelos, herramientas y bucles de agentes sin requerir orquestación compleja inmediata.",
+        "justificacion": "El texto especifica que LangChain debe usarse cuando se quiere construir rápidamente, se necesitan abstracciones estándar para modelos/herramientas/bucles, y se construyen aplicaciones de agentes directas sin necesidades complejas de orquestación."
+      },
+      {
+        "pregunta": "Desde la perspectiva de la arquitectura de software descrita, ¿cómo se relacionan estructuralmente LangChain y LangGraph?",
+        "opciones": [
+          "LangGraph está construido completamente sobre LangChain para añadir interfaces de usuario.",
+          "Son herramientas completamente independientes y mutuamente excluyentes en la pila.",
+          "LangChain está construido sobre LangGraph, permitiendo usar LangChain sin necesidad de conocer los detalles de LangGraph inicialmente.",
+          "LangChain opera como un harness y LangGraph como un framework de interfaz."
+        ],
+        "respuesta_correcta": "LangChain está construido sobre LangGraph, permitiendo usar LangChain sin necesidad de conocer los detalles de LangGraph inicialmente.",
+        "justificacion": "El documento fuente indica explícitamente que LangChain (por ejemplo, versiones 1.0) está construido sobre LangGraph, aunque no es un requisito conocer LangGraph en profundidad para empezar a utilizar LangChain."
+      }
+    ]
+  }
+}
