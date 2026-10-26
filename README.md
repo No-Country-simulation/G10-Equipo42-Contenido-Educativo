@@ -145,7 +145,7 @@ graph TB
     RAG_SRV --> FAISS_DB
     GEN_SRV --> GEMINI
 
-    STORAGE_SRV -->|Inmediato (<1ms)| LOCAL_STORAGE
+    STORAGE_SRV -->|"Inmediato (<1ms)"| LOCAL_STORAGE
     STORAGE_SRV -.->|Sync en Background| OCI_STORAGE
 ```
 
