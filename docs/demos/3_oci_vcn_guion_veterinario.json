@@ -1,0 +1,55 @@
+{
+  "status": "completed",
+  "metadatos": {
+    "perfil_aplicado": "Junior",
+    "formato_generado": "Guion de Clase",
+    "tiempo_estimado_estudio_minutos": 45,
+    "conceptos_clave": [
+      "Red Virtual en la Nube (VCN)",
+      "Subredes",
+      "Tarjetas de Interfaz de Red Virtual (VNIC)",
+      "Gateways",
+      "Listas de Seguridad y Tablas de Rutas",
+      "Políticas de IAM"
+    ],
+    "prerrequisitos": [
+      "Conceptos básicos de redes IP",
+      "Familiaridad inicial con la consola de Oracle Cloud Infrastructure"
+    ]
+  },
+  "evaluacion_calidad": {
+    "anclaje_fuente_score": 1.0,
+    "claridad_pedagogica": "La estructura del contenido es excelente, manteniendo una progresión lógica desde los conceptos básicos de networking en la nube (VCN) hasta elementos avanzados como pasarelas (gateways), políticas de IAM y control de acceso. La analogía utilizada (infraestructura de una clínica veterinaria) está perfectamente adaptada al perfil del estudiante sugerido en el título y se mantiene de manera consistente a lo largo de las fases, facilitando la comprensión de conceptos abstractos de redes mediante ejemplos tangibles y bien contextualizados.",
+    "observaciones": "Todo el contenido generado está rigurosamente respaldado por los fragmentos del documento fuente de Oracle Cloud Infrastructure. No se detectan afirmaciones inventadas, extrapolaciones injustificadas ni información ajena a la documentación oficial proporcionada. Las definiciones técnicas de VCN, subredes, rangos CIDR, VNIC, gateways, listas de seguridad, tablas de rutas y los verbos de IAM (inspect vs manage) corresponden exactamente con los datos del texto de referencia."
+  },
+  "contenido_adaptado": {
+    "titulo": "Arquitectura de Redes en la Nube para Clínicas Veterinarias Digitales: Fundamentos de OCI Networking",
+    "introduccion_contextualizada": "Imagina que tu clínica veterinaria tradicional se expande y necesita conectar múltiples consultorios, historias clínicas centralizadas y sistemas de diagnóstico por imagen en la nube. Así como organizas las áreas de hospitalización, quirófanos y farmacia en tu clínica, en Oracle Cloud Infrastructure (OCI) debes estructurar tu red virtual. En esta clase aprenderás los componentes esenciales de OCI Networking (VCNs, subredes, gateways y seguridad) usando la analogía de la infraestructura de una red hospitalaria veterinaria.",
+    "items": [
+      {
+        "fase": "Apertura",
+        "contenido": "Presentación del objetivo de la clase: entender cómo estructurar el entorno de red en OCI para alojar aplicaciones y bases de datos veterinarias de forma segura. Se introduce la Red Virtual en la Nube (VCN) como el perímetro general de nuestra red en la nube, equivalente al edificio principal de nuestra clínica veterinaria que abarca una región única de OCI.",
+        "duracion_minutos": 5,
+        "notas_formador": "Establecer la analogía principal entre la infraestructura física de una clínica y la infraestructura virtual en la nube."
+      },
+      {
+        "fase": "Desarrollo",
+        "contenido": "Explicación de los componentes troncales de OCI Networking. 1. Subredes y Notación CIDR: Cómo subdividir la VCN (por ejemplo, usando rangos como 10.0.0.0/16 y subredes /24) para separar áreas, equivalente a separar la zona de urgencias de la zona administrativa. Explicar que cada subred reserva tres direcciones IP (red, difusión y gateway). 2. VNIC (Tarjetas de Interfaz de Red Virtual): Los puntos de conexión de las instancias de Compute (nuestros servidores de historias clínicas), donde cada VNIC tiene una IP privada principal que no cambia durante su ciclo de vida. 3. Gateways: Enrutadores virtuales como el Gateway de Internet para acceso público, el Gateway NAT para actualizaciones de software sin exposición entrante, y el Gateway de Servicios para conectar de forma privada con Object Storage (ideal para respaldos de radiografías sin pasar por internet).",
+        "duracion_minutos": 20,
+        "notas_formador": "Profundizar en la diferencia entre subredes públicas y privadas utilizando el ejemplo de un portal web público de citas versus una base de datos interna de pacientes."
+      },
+      {
+        "fase": "Actividad",
+        "contenido": "Ejercicio práctico guiado de diseño de red: Los estudiantes planificarán la topología de red para una aplicación veterinaria simulada. Deben definir una VCN con un rango CIDR válido, crear una subred pública para el servidor web de citas y una subred privada para la base de datos de pacientes, asociando las tablas de rutas y listas de seguridad correspondientes (reglas de firewall virtual con estado).",
+        "duracion_minutos": 15,
+        "notas_formador": "Supervisar que los bloques CIDR no se solapen y que utilicen correctamente las listas de seguridad para restringir puertos (como el puerto TCP 22 para SSH)."
+      },
+      {
+        "fase": "Cierre",
+        "contenido": "Resumen de los puntos clave y revisión de las políticas de IAM básicas para Networking (como la familia de recursos virtual-network-family y el uso de verbos como inspect frente a manage). Espacio para resolver dudas sobre la asignación de IPs efímeras o reservadas y la asociatividad de los componentes por defecto en OCI.",
+        "duracion_minutos": 5,
+        "notas_formador": "Destacar la importancia de la flexibilidad en el principio de menor privilegio al configurar políticas de IAM para administradores de red junior."
+      }
+    ]
+  }
+}
