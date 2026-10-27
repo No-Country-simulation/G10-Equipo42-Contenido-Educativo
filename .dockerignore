@@ -1,0 +1,30 @@
+# Control de versiones
+.git
+.gitignore
+
+# Entornos virtuales y caches de python
+.venv
+venv/
+env/
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache
+.coverage
+htmlcov
+.ruff_cache
+
+# Variables de entorno y secretos locales
+.env
+.env.*
+!.env.example
+
+# Documentos temporales y artefactos
+.bmad
+_bmad
+_bmad-output
+*.log
+
+# Tests (no requeridos en el contenedor de ejecucion)
+tests/
