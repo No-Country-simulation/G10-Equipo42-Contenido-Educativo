@@ -1,5 +1,6 @@
 # 🧠 NuevaMente — Plataforma de Adaptación Pedagógica de Documentación Técnica
 
+[![Demo en Vivo](https://img.shields.io/badge/Demo%20en%20Vivo-nuevamente.onrender.com-00b4d8.svg?logo=render&logoColor=white)](https://nuevamente.onrender.com)
 [![Python](https://img.shields.io/badge/Python-3.12%2B-blue.svg?logo=python&logoColor=white)](https://www.python.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.115%2B-009688.svg?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
 [![LangGraph](https://img.shields.io/badge/LangGraph-1.2%2B-orange.svg)](https://langchain-ai.github.io/langgraph/)
@@ -10,7 +11,9 @@
 [![Tests](https://img.shields.io/badge/Tests-28%20passing-brightgreen.svg)](https://pytest.org/)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-**NuevaMente** es una plataforma de inteligencia artificial diseñada para transformar documentación técnica compleja (manuales en **PDF**, guías en **Markdown** o código/tutoriales en **Texto plano**) en paquetes pedagógicos estructurados y altamente personalizados.
+> 🌐 **Demo en vivo disponible en:** [https://nuevamente.onrender.com](https://nuevamente.onrender.com)
+
+**NuevaMente** es una plataforma de aprendizaje diseñada para transformar documentación técnica compleja (manuales en **PDF**, guías en **Markdown** o código/tutoriales en **Texto plano**) en paquetes pedagógicos estructurados y altamente personalizados.
 
 A diferencia de un chatbot RAG convencional de preguntas y respuestas, **NuevaMente no responde preguntas puntuales**: ingesta el documento fuente completo y sintetiza un producto de aprendizaje nuevo, rigurosamente estructurado bajo modelos **Pydantic**, calibrado según el nivel de experiencia del destinatario, el formato pedagógico de estudio y un nicho sectorial opcional, garantizando siempre una alta fidelidad al texto original (`anclaje_fuente_score >= 0.70`).
 
